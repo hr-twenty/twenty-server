@@ -1,9 +1,9 @@
-var appRoot = __dirname,
+var path = require('path'),
+    appRoot = path.normalize(__dirname + '/..'),
     express = require('express'),
     morgan = require('morgan'),
     bodyParser = require('body-parser'),
-    methodOverride = require('method-override'),
-    path = require('path');
+    methodOverride = require('method-override');
 
 module.exports = function(app, config) {
   app.set('port', config.port);
