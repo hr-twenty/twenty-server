@@ -1,0 +1,25 @@
+{
+  "name": "twenty",
+  "version": "0.0.0",
+  "description": "Professional meetups",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --recursive",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "method-override": "^1.0.0",
+    "body-parser": "^1.0.2",
+    "express": "^4.0.0",
+    "morgan": "^1.0.0"
+  },
+  "devDependencies": {
+    "mocha": "^1.18.2",
+    "gulp": "^3.6.1"
+  }
+}
