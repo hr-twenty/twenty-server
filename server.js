@@ -1,13 +1,12 @@
-var express = require('express'),
-    config = require('./config/config');
+var app = require('express')();
 
-var app = express();
+require('./config/express')(app);
+require('./config/routes')(app);
 
-require('./config/express')(app, config);
-require('./app/routes')(app);
-
-app.listen(app.get('port'), function() {
-  console.log('Listening on port ' + app.get('port') + '...');
+var server = app.listen(app.get('port'), function() {
+  console.log('Started in env ', process.env.NODE_ENV);
+  console.log('Listening on port', app.get('port'), '...');
 });
 
-console.log(process.env.ENVIRONMENT);
+//for testing
+module.exports = app;
