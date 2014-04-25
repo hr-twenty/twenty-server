@@ -1,8 +1,28 @@
-var linkedin = require('../config/linkedin'),
-    https = require('https'),
-    passport = require('passport');
+/* global require */
+var linkedin = require('../config/linkedin');
+var https = require('https');
+var passport = require('passport');
+var matchHandlers = require('./matchHandlers')
 
 module.exports = function(app) {
+
+//Users
+  app.get('/user', matchHandlers.getUserData)
+  app.post('/user', matchHandlers.createNewUser);
+  app.put('/user', matchHandlers.updateUser)
+  app.del('/user', matchHandlers.deleteUser)
+
+//UserStack
+  app.get('/userStack', matchHandlers.getUserStack)
+  app.post('/userStack', matchHandlers.approve)
+
+//Messages
+  app.get('/messages', matchHandlers.getMessages)
+  app.post('/messages', matchHandlers.postMessage)
+
+
+
+
 
   app.route('/auth/linkedin')
   .get(function(req, res) {

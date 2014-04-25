@@ -1,0 +1,78 @@
+====Nodes====
+User {
+  id : linkedIn.id,
+  firstName : linkedIn.person.first-name,
+  lastName : linkedIn.person.last-name,
+  headline: linkedIn.person.headline,
+  picture: linkedIn.person.picture-url,
+  numConnections: linkedIn.person.connections
+}
+
+Location {
+  city: linkedIn.location.name,
+  country: linkedIn.location.country
+}
+
+Industry {
+  name: linkedIn.industry
+}
+
+Position {
+  name: linkedIn.title
+}
+
+Company {
+  name: linkedIn.company.name
+}
+
+CompanySize {
+  size: linkedIn.company.size
+}
+
+Language {
+  name: linkedIn.language.name
+}
+
+Skill {
+  name: linkedIn.skill.name
+}
+
+School {
+  name: linkedIn.educations.school-name
+}
+
+Meeting {
+  time,
+  notes (ie. location)
+}
+
+====Relationships====
+(:User) -[:LIVES_IN]-> (:Location)
+(:User) -[:WORKS_IN]-> (:Industry)
+(:User) -[:ROLE_IS, :ROLE_WAS]-> (:Position)
+  relationship properties {
+    startDate: linkedIn.position.start-date,
+    endDate: linkedIn.position.end-date
+  }
+(:User) -[:WORKS_FOR, :WORKED_FOR]-> (:Company)
+(:User) -[:HAS_SKILL]-> (:Skill)
+(:User) -[:GOING_TO, :WENT_TO]-> (:Meeting)
+(:User) -[:PROFICIENCY]-> (:Language)
+  relationship properties {
+    level: linkedIn.languages.proficiencyName
+  }
+(:User) -[:ATTENDED]-> (:School)
+  relationship properties {
+    fieldOfStudy: linkedIn.educations.field-of-study,
+    startDate: linkedIn.educations.start-date,
+    endDate: linkedIn.educations.end-date,
+  }
+(:Company) -[:OPERATES_IN]-> (:Industry)
+(:Company) -[:HAS_SIZE]-> (:CompanySize)
+
+(:User) -[:APPROVED]- (:User)
+  relationship properties {
+    startDate: date both parties approve,
+    conversation: [{sender, text, timestamp}]
+  }
+(:User) -[:DISMISSED]- (:User)
