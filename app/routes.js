@@ -20,10 +20,7 @@ module.exports = function(app) {
   app.get('/messages', matchHandlers.getMessages)
   app.post('/messages', matchHandlers.postMessage)
 
-
-
-
-
+//LinkedIn
   app.route('/auth/linkedin')
   .get(function(req, res) {
     res.redirect('https://www.linkedin.com/uas/oauth2/authorization' +

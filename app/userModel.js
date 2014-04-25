@@ -1,5 +1,7 @@
+/* global require, module*/
 var neo4j = require('neo4j');
 var db = new neo4j.GraphDatabase('http://twenty:r5JqrtqFkkK1AtzxkOyc@twenty.sb01.stations.graphenedb.com:24789');
+var otherModels = require('./everyOtherModel');
 
 // Private constructor:
 // Used to ensure all nodes have access to user functions
@@ -127,7 +129,8 @@ User.create = function (linkedIn, callback) {
   });
 };
 
-User.get = function (id, callback) {
+User.get = function (callback) {
+  var id = this.id;
   db.getNodeById(id, function (err, node) {
     if (err) return callback(err);
     callback(null, new User(node));
