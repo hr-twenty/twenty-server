@@ -1,8 +1,6 @@
 var linkedin = require('../config/linkedin'),
     querystring = require('querystring'),
     request = require('request'),
-    https = require('https'),
-    http = require('http'),
     passport = require('passport');
 
 module.exports = function(app) {
@@ -30,44 +28,30 @@ module.exports = function(app) {
       
       var url = 'https://www.linkedin.com/uas/oauth2/accessToken?' +
         querystring.stringify(data);
-      console.log(url);
 
       request(url, function(error, response, body) {
-        console.log(body);
+        var json = JSON.parse(body);
+        var accessQuery = '?' + querystring.stringify({
+          oauth2_access_token: json.access_token
+        });
+
+        var personUrl = 'https://api.linkedin.com/v1/people/~' +
+          ':(' +
+          'id,first-name,last-name,headline,picture-url,numConnections,' +
+          'location:(name,country),' +
+          'industry,' +
+          'positions:(title,' +
+          'company:(name,' +
+          'size)),' +
+          'languages:(language:(name)),' +
+          'skills:(skill:(name)),' +
+          'educations:(school-name)' +
+          ')' +
+          accessQuery;
+        request(personUrl, function(error, response, body) {
+          res.send(body);
+        });
       });
-
-
-      // var options = {
-      //   hostname: 'www.linkedin.com',
-      //   path: '/uas/oauth2/accessToken?' +
-      //     querystring.stringify(data),
-      //     // '?grant_type=authorization_code' +
-      //     // '&code=' + req.query.code +
-      //     // '&redirect_uri=' + linkedin.redirectUri +
-      //     // '&client_id=' + linkedin.apiKey +
-      //     // '&client_secret=' + linkedin.secretKey,
-      //   method: 'POST'
-      // };
-      // var linkedinReq = https.request(options, function(linkedinRes) {
-      //   
-      //   console.log('status code', linkedinRes.statusCode);
-      //
-      //   linkedinRes.on('data', function(chunk) {
-      //     process.stdout.write(chunk);
-      //   });
-      //
-      // });
-      // linkedinReq.
-      //     grant_type: 'authorization_code',
-      //     code: req.query.code,
-      //     redirect_uri: linkedin.redirectUri,
-      //     client_id: linkedin.apiKey,
-      //     client_secret: linkedin.secretKey
-      // linkedinReq.end();
-
-
-      res.send('hello');
-
     } else {
       res.send('CSRF detected...');
     }
