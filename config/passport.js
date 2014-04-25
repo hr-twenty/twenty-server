@@ -1,4 +1,3 @@
-// var LinkedInStrategy = require('passport-linkedin').Strategy;
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 
 module.exports = function(app, passport, linkedin) {
@@ -16,9 +15,6 @@ module.exports = function(app, passport, linkedin) {
     callbackURL: linkedin.redirectUri,
     passReqToCallback: true
   }, function(req, accessToken, refreshToken, profile, done) {
-    console.log('In passport strategy')
-    console.log(profile);
-
     req.session.accessToken = accessToken;
     process.nextTick(function() {
       return done(null, profile);
