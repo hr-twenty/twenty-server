@@ -45,7 +45,7 @@ User.prototype.approve = function (other, callback) {
 //NEED TO MAKE THIS WORK
 User.prototype.getMessages = function(callback){
   var query = [
-    'MATCH (user:User) -[rel:APPROVED]- (other:User)',
+    'MATCH (user:User) -[rel:MUTUAL]- (other:User)',
     'WHERE ID(user) = {userId}',
     'RETURN other, rel.startDate, rel.conversation'
   ].join('\n')
@@ -63,8 +63,8 @@ User.prototype.getMessages = function(callback){
 //NEED TO MAKE THIS WORK
 User.prototype.sendMessage = function(other, callback){
   var query = [
-    'MATCH (user:User) -[rel:APPROVED]- (other:User)',
-    'WHERE ID(user) = {userId}',
+    'MATCH (user:User) -[rel:MUTUAL]- (other:User)',
+    'WHERE ID(user) = {userId} AND ID(other) = {otherId}',
     'RETURN other, rel.startDate, rel.conversation'
   ].join('\n')
 
@@ -115,11 +115,23 @@ User.create = function (linkedIn, callback) {
 
   var query = [
     'CREATE (user:User {dbData})',
-    'RETURN user',
+    'CREATE UNIQUE (user) -[:LIVES_IN]-> (location:Location)',
+    'CREATE UNIQUE (user) -[:WORKS_IN]-> (industry:Industry)'
+    'CREATE UNIQUE (user) -[:ROLE_IS {startDate: startDate, endDate: endDate}]-> (curPosition:Position)',
+    'FOREACH (position in prevPosition | CREATE UNIQUE (user) -[:ROLE_WAS {startDate: startDate, endDate: endDate}]-> (position:Position))',
+    'CREATE UNIQUE (user) -[:WORKS_FOR]-> (:Company)',
+    'FOREACH (company in prevCompany | CREATE UNIQUE (user) -[:WORKED_FOR {startDate: startDate, endDate: endDate}]-> (position:Position))',
+    'CREATE UNIQUE (user) -[:HAS_SKILL]-> (:Skill)',
+    'CREATE UNIQUE (user) -[:PROFICIENCY {languages: languages}]-> (:Language)',
+    'CREATE UNIQUE (user) -[:ATTENDED {fieldOfStudy: fieldOfStudy,
+    startDate: fieldOfStudyStartDate,
+    endDate: fieldOfStudyEndDate}]-> (:School)',
+    'RETURN user'
   ].join('\n');
 
   var params = {
     data: dbData
+    languages: {}
   };
 
   db.query(query, params, function (err, results) {
@@ -136,10 +148,6 @@ User.get = function (callback) {
     callback(null, new User(node));
   });
 };
-
-
-
-
 
 
 // // calls callback w/ (err, following, others) where following is an array of
