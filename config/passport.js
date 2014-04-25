@@ -1,13 +1,25 @@
-var passport = require('passport'),
-    LinkedInStrategy = require('passport-linkedin').Strategy;
+// var LinkedInStrategy = require('passport-linkedin').Strategy;
+var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 
-module.exports = function(app, linkedin) {
+module.exports = function(app, passport, linkedin) {
+  passport.serializeUser(function(user, done) {
+    done(null, user);
+  });
+
+  passport.deserializeUser(function(obj, done) {
+    done(null, obj);
+  });
+
   passport.use(new LinkedInStrategy({
-    consumerKey: linkedin.apiKey,
-    consumerSecret: linkedin.secretKey,
-    callbackURL: linkedin.redirectUri
-  }, function(token, tokenSecret, profile, done) {
+    clientID: linkedin.apiKey,
+    clientSecret: linkedin.secretKey,
+    callbackURL: linkedin.redirectUri,
+    passReqToCallback: true
+  }, function(req, accessToken, refreshToken, profile, done) {
     console.log('In passport strategy')
+    console.log(profile);
+
+    req.session.accessToken = accessToken;
     process.nextTick(function() {
       return done(null, profile);
     });
