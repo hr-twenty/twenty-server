@@ -1,6 +1,6 @@
 ====Nodes====
 User {
-  id : linkedIn.id,
+  userId : linkedIn.id,
   firstName : linkedIn.person.first-name,
   lastName : linkedIn.person.last-name,
   headline: linkedIn.person.headline,
@@ -50,11 +50,11 @@ Meeting {
 (:User) -[:LIVES_IN]-> (:Location)
 (:User) -[:WORKS_IN]-> (:Industry)
 (:User) -[:ROLE_IS, :ROLE_WAS]-> (:Position)
+(:User) -[:WORKS_FOR, :WORKED_FOR]-> (:Company)
   relationship properties {
     startDate: linkedIn.position.start-date,
     endDate: linkedIn.position.end-date
   }
-(:User) -[:WORKS_FOR, :WORKED_FOR]-> (:Company)
 (:User) -[:HAS_SKILL]-> (:Skill)
 (:User) -[:GOING_TO, :WENT_TO]-> (:Meeting)
 (:User) -[:PROFICIENCY]-> (:Language)
@@ -70,9 +70,12 @@ Meeting {
 (:Company) -[:OPERATES_IN]-> (:Industry)
 (:Company) -[:HAS_SIZE]-> (:CompanySize)
 
-(:User) -[:APPROVED]- (:User)
+(:User) -[:APPROVED]-> (:User)
   relationship properties {
     startDate: date both parties approve,
-    conversation: [{sender, text, timestamp}]
   }
-(:User) -[:DISMISSED]- (:User)
+(:User) -[:CONNECTED_TO]- (:User)
+relationship properties {
+  startDate: date both parties approve,
+  conversation: [{sender, text, timestamp}]
+}

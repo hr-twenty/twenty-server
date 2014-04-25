@@ -19,8 +19,7 @@ User.prototype.save = function (callback) {
 User.prototype.del = function (callback) {
   // use a Cypher query to delete both this user and all of his relationships
   var query = [
-    'MATCH (user:User)',
-    'WHERE ID(user) = {userId}',
+    'MATCH (user:User {userId})',
     'DELETE user',
     'WITH user',
     'MATCH OPTIONAL (user) -[rel]- (other)',
@@ -37,16 +36,28 @@ User.prototype.del = function (callback) {
 };
 
 User.prototype.approve = function (other, callback) {
-  this._node.createRelationshipTo(other._node, 'APPROVED', {}, function (err, rel) {
-    callback(err);
+  var query = [
+    'MATCH (user:User {userId}), (other:User {otherId})',
+    'MATCH OPTIONAL (other)-[r:APPROVES]->(user)',
+    //if optional match [r] exists, delete relationship and add -[:CONNECTED_TO]-
+    //otherwise 'MERGE (user)-[:APPROVES]->(other)',
+    'RETURN type(r)'
+  ];
+
+  var params = {
+    userId: this.id,
+    otherId: other.id
+  };
+
+  db.query(query, params, function (err, results) {
+    if (err) return callback(err);
+    callback(err, results);
   });
 };
 
-//NEED TO MAKE THIS WORK
 User.prototype.getMessages = function(callback){
   var query = [
-    'MATCH (user:User) -[rel:MUTUAL]- (other:User)',
-    'WHERE ID(user) = {userId}',
+    'MATCH (user:User {userId}) -[rel:CONNECTED_TO]- (other:User)',
     'RETURN other, rel.startDate, rel.conversation'
   ].join('\n')
 
@@ -63,8 +74,8 @@ User.prototype.getMessages = function(callback){
 //NEED TO MAKE THIS WORK
 User.prototype.sendMessage = function(other, callback){
   var query = [
-    'MATCH (user:User) -[rel:MUTUAL]- (other:User)',
-    'WHERE ID(user) = {userId} AND ID(other) = {otherId}',
+    'MATCH (user:User {userId}) -[rel:CONNECTED_TO]- (other:User {otherId})',
+    'SET rel.'
     'RETURN other, rel.startDate, rel.conversation'
   ].join('\n')
 
@@ -79,13 +90,13 @@ User.prototype.sendMessage = function(other, callback){
   });
 };
 
-//NEED TO MAKE THIS WORK
-//CREATE PENDING RELATIONSHIP ON ALL OTHERS
-User.prototype.getUserStack = function (query, callback) {
+User.prototype.getUserStack = function (callback) {
   var query = [
-    'MATCH (user:User), (other:User)',
-    'WHERE ID(user) = {userId} AND ID(user) <> ID(other) AND NOT (user)-->(other)'
-    'RETURN collection(other)',
+    'MATCH (user:User {userId}), (other:User)',
+    'WHERE user.userId <> other.userId AND NOT (user)-->(other)',
+    'OPTIONAL MATCH (other)-[r:APPROVES]->(user)',
+    'RETURN collection(other), count(r)',
+    'ORDER BY count(r)',
     'LIMIT 10'
   ].join('\n');
 
@@ -93,59 +104,50 @@ User.prototype.getUserStack = function (query, callback) {
     userId: this.id
   };
 
-  db.query(query, null, function (err, results) {
+  db.query(query, params, function (err, results) {
     if (err) return callback(err);
-    var users = results.map(function (result) {
-        return new User(result['user']);
-    });
-    callback(null, users);
+    callback(null, results);
   });
 };
 
 // static methods:
 User.create = function (linkedIn, callback) {
-  var dbData = {
-    id : linkedIn.id,
-    firstName : linkedIn.person.first-name,
-    lastName : linkedIn.person.last-name,
-    headline: linkedIn.person.headline,
-    picture: linkedIn.person.picture-url,
-    numConnections: linkedIn.person.connections
-  };
-
   var query = [
-    'CREATE (user:User {dbData})',
-    'CREATE UNIQUE (user) -[:LIVES_IN]-> (location:Location)',
-    'CREATE UNIQUE (user) -[:WORKS_IN]-> (industry:Industry)'
-    'CREATE UNIQUE (user) -[:ROLE_IS {startDate: startDate, endDate: endDate}]-> (curPosition:Position)',
-    'FOREACH (position in prevPosition | CREATE UNIQUE (user) -[:ROLE_WAS {startDate: startDate, endDate: endDate}]-> (position:Position))',
-    'CREATE UNIQUE (user) -[:WORKS_FOR]-> (:Company)',
-    'FOREACH (company in prevCompany | CREATE UNIQUE (user) -[:WORKED_FOR {startDate: startDate, endDate: endDate}]-> (position:Position))',
-    'CREATE UNIQUE (user) -[:HAS_SKILL]-> (:Skill)',
-    'CREATE UNIQUE (user) -[:PROFICIENCY {languages: languages}]-> (:Language)',
-    'CREATE UNIQUE (user) -[:ATTENDED {fieldOfStudy: fieldOfStudy,
-    startDate: fieldOfStudyStartDate,
-    endDate: fieldOfStudyEndDate}]-> (:School)',
+    'MERGE (user:User {userData})',
+    'MERGE (location:Location {locationData})',
+    'MERGE (industry:Industry {industryData})',
+    'MERGE (curPosition:Position {curPositionData})',
+    'MERGE (curCompany:Company {curCompanyData})',
+    'MERGE (companySize:CompanySize {companySizeData})',
+    'MERGE (language:Language {languageData})',
+    'MERGE (skill:Skill {skillData})',
+    'MERGE (school:School {schoolData})',
+    'MERGE (user) -[:LIVES_IN]-> (location)',
+    'MERGE (user) -[:WORKS_IN]-> (industry)',
+    'MERGE (user) -[:ROLE_IS]-> (curPosition)',
+    'FOREACH (prevPosition in prevPositions | MERGE (user) -[:ROLE_WAS]-> (prevPosition))',
+    'MERGE (user) -[:WORKS_FOR {worksForData}]-> (curCompany)',
+    'FOREACH (prevCompany in prevCompanies | MERGE (user) -[:WORKED_FOR {workedForData}]-> (prevCompany))',
+    'MERGE (user) -[:HAS_SKILL]-> (skill)',
+    'MERGE (user) -[:PROFICIENCY {proficiencyData}]-> (language)',
+    'MERGE (user) -[:ATTENDED {attendedData}]-> (school)',
     'RETURN user'
   ].join('\n');
 
-  var params = {
-    data: dbData
-    languages: {}
-  };
+  var params = linkedIn;
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
     var user = new User(results[0]['user']);
-    callback(null, user);
+    callback(err, user);
   });
 };
 
 User.get = function (callback) {
   var id = this.id;
-  db.getNodeById(id, function (err, node) {
+  db.getNodeById(id, function (err, user) {
     if (err) return callback(err);
-    callback(null, new User(node));
+    callback(err, user);
   });
 };
 

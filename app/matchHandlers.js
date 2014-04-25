@@ -51,5 +51,6 @@ exports.getMessages = function(req, res){
 
 exports.sendMessage = function(req, res){
   var otherId = req.body.id;
-  User.sendMessage(otherId, generalResponse(res));
+  var message = req.body.msg;
+  User.sendMessage(otherId, message, generalResponse(res));
 };
