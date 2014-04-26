@@ -13,16 +13,17 @@ var generalResponse = function(res){
 
 //User
 exports.createNewUser = function(req, res){
-  var userData = req.body.something;
+  var userData = req.body;
   User.create(userData, generalResponse(res));
 };
 
 exports.getUserData = function(req, res){
-  User.get(generalResponse(res));
+  var userData = req.query;
+  User.get(userData, generalResponse(res));
 };
 
 exports.updateUser = function(req, res){
-  var userData = req.body.something;
+  var userData = req.query.something;
   User.save(userData, generalResponse(res));
 };
 
@@ -30,27 +31,26 @@ exports.deleteUser = function(req, res){
   User.del(generalResponse(res));
 };
 
-exports.updateUser = function(req, res){
-  var userData = req.body.something;
-  User.create(userData, generalResponse(res));
-};
-
 //UserStack
 exports.getUserStack = function(req, res){
   User.getMessages(generalResponse(res));
 };
 exports.approve = function(req, res){
-  var otherId = req.body.id;
+  var otherId = req.query.id;
   User.approve(otherId, generalResponse(res));
 };
 
 //Messages
-exports.getMessages = function(req, res){
-  User.getMessages(generalResponse(res));
+exports.getAllConversations = function(req, res){
+  User.getAllConversations(generalResponse(res));
+};
+
+exports.getOneConversation = function(req, res){
+  User.getOneConversation(generalResponse(res));
 };
 
 exports.sendMessage = function(req, res){
-  var otherId = req.body.id;
-  var message = req.body.msg;
+  var otherId = req.query.id;
+  var message = req.query.msg;
   User.sendMessage(otherId, message, generalResponse(res));
 };

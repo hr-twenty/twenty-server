@@ -1,7 +1,6 @@
 /* global require, module*/
 var neo4j = require('neo4j');
-var db = new neo4j.GraphDatabase('http://twenty:r5JqrtqFkkK1AtzxkOyc@twenty.sb01.stations.graphenedb.com:24789');
-var otherModels = require('./everyOtherModel');
+var db = new neo4j.GraphDatabase('http://twenty2:tbPqL9YHwh75qOYp9rkK@twenty2.sb01.stations.graphenedb.com:24789');
 
 // Private constructor:
 // Used to ensure all nodes have access to user functions
@@ -55,11 +54,27 @@ User.prototype.approve = function (other, callback) {
   });
 };
 
-User.prototype.getMessages = function(callback){
+User.prototype.getAllConversations = function(callback){
   var query = [
     'MATCH (user:User {userId}) -[rel:CONNECTED_TO]- (other:User)',
-    'RETURN other, rel.startDate, rel.conversation'
-  ].join('\n')
+    'RETURN other, rel'
+  ].join('\n');
+
+  var params = {
+    userId: this.id
+  };
+
+  db.query(query, params, function (err, results) {
+    if (err) return callback(err);
+    callback(err, results);
+  });
+};
+
+User.prototype.getOneConversation = function(callback){
+  var query = [
+    'MATCH (user:User {userId}) -[rel:CONNECTED_TO]- (other:User)',
+    'RETURN other, rel'
+  ].join('\n');
 
   var params = {
     userId: this.id
@@ -75,9 +90,9 @@ User.prototype.getMessages = function(callback){
 User.prototype.sendMessage = function(other, callback){
   var query = [
     'MATCH (user:User {userId}) -[rel:CONNECTED_TO]- (other:User {otherId})',
-    'SET rel.'
+    'SET rel.',
     'RETURN other, rel.startDate, rel.conversation'
-  ].join('\n')
+  ].join('\n');
 
   var params = {
     userId: this.id,
@@ -111,43 +126,50 @@ User.prototype.getUserStack = function (callback) {
 };
 
 // static methods:
-User.create = function (linkedIn, callback) {
+User.create = function (linkedInData, callback) {
   var query = [
-    'MERGE (user:User {userData})',
-    'MERGE (location:Location {locationData})',
-    'MERGE (industry:Industry {industryData})',
-    'MERGE (curPosition:Position {curPositionData})',
-    'MERGE (curCompany:Company {curCompanyData})',
-    'MERGE (companySize:CompanySize {companySizeData})',
-    'MERGE (language:Language {languageData})',
-    'MERGE (skill:Skill {skillData})',
-    'MERGE (school:School {schoolData})',
+    'MERGE (user:User {userId:{userId}, firstName:{firstName}, lastName:{lastName}, headline: {headline}, picture: {picture}, numConnections: {numConnections}})',
+    'MERGE (location:Location {city:{locationCity}, country:{locationCountry}})',
+    'MERGE (industry:Industry {name:{industryName}})',
+    'MERGE (curPosition:Position {title:{curPositionTitle}})',
+    'MERGE (curCompany:Company {name: {curCompanyName}})',
+    'MERGE (companySize:CompanySize {size: {companySize}})',
+    'MERGE (language:Language {name: {languageName}})',
+    'MERGE (skill:Skill {skill: {skillName}})',
+    'MERGE (school:School {name: {schoolName}})',
     'MERGE (user) -[:LIVES_IN]-> (location)',
     'MERGE (user) -[:WORKS_IN]-> (industry)',
     'MERGE (user) -[:ROLE_IS]-> (curPosition)',
-    'FOREACH (prevPosition in prevPositions | MERGE (user) -[:ROLE_WAS]-> (prevPosition))',
-    'MERGE (user) -[:WORKS_FOR {worksForData}]-> (curCompany)',
-    'FOREACH (prevCompany in prevCompanies | MERGE (user) -[:WORKED_FOR {workedForData}]-> (prevCompany))',
+    // 'FOREACH (prevPosition in prevPositions | MERGE (user) -[:ROLE_WAS]-> (prevPosition))',
+    'MERGE (user) -[:WORKS_FOR {startDate: {curCompanyStartDate}, endDate: {curCompanyEndDate}}]-> (curCompany)',
+    'MERGE (curCompany) -[:HAS_CO_SIZE]-> (companySize)',
+    // 'FOREACH (prevCompany in prevCompanies | MERGE (user) -[:WORKED_FOR {workedForData}]-> (prevCompany))',
     'MERGE (user) -[:HAS_SKILL]-> (skill)',
-    'MERGE (user) -[:PROFICIENCY {proficiencyData}]-> (language)',
-    'MERGE (user) -[:ATTENDED {attendedData}]-> (school)',
-    'RETURN user'
+    'MERGE (user) -[:PROFICIENCY {level: {languageProficiency}}]-> (language)',
+    'MERGE (user) -[:ATTENDED {fieldOfStudy: {schoolFieldOfStudy}, startDate: {schoolStartDate},endDate: {schoolEndDate}}]-> (school)',
+    'RETURN user, location, industry, curPosition, curCompany, companySize, language, skill, school'
   ].join('\n');
 
-  var params = linkedIn;
+  var params = linkedInData;
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
-    var user = new User(results[0]['user']);
-    callback(err, user);
+    callback(err, results[0]);
   });
 };
 
-User.get = function (callback) {
-  var id = this.id;
-  db.getNodeById(id, function (err, user) {
+User.get = function (data, callback) {
+  var query = [
+    'MATCH (user:User {userId:{userId}})',
+    'OPTIONAL MATCH (user)-[rel]->(other)',
+    'RETURN user, rel, other'
+  ].join('\n');
+  console.log(data)
+  var params = data;
+
+  db.query(query, params, function (err, results) {
     if (err) return callback(err);
-    callback(err, user);
+    callback(err, results[0]);
   });
 };
 
