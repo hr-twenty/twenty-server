@@ -23,7 +23,7 @@ exports.getUserData = function(req, res){
 };
 
 exports.updateUser = function(req, res){
-  var userData = req.query.something;
+  var userData = req.query;
   User.save(userData, generalResponse(res));
 };
 
@@ -33,8 +33,10 @@ exports.deleteUser = function(req, res){
 
 //UserStack
 exports.getUserStack = function(req, res){
-  User.getMessages(generalResponse(res));
+  var userData = req.query;
+  User.getUserStack(userData, generalResponse(res));
 };
+
 exports.approve = function(req, res){
   var otherId = req.query.id;
   User.approve(otherId, generalResponse(res));

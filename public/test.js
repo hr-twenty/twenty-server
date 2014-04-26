@@ -1,12 +1,19 @@
-window.test = function(data){
+window.getUser = function(data){
   $.get('/user', data, function(err, user){
     console.log(err)
     console.log(user)
   });
 };
 
-window.test2 = function(data){
+window.postUser = function(data){
   $.post('/user', data, function(err, user){
+    console.log(err)
+    console.log(user)
+  });
+};
+
+window.retrieveStack = function(data){
+  $.get('/userStack', data, function(err, user){
     console.log(err)
     console.log(user)
   });
