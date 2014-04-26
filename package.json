@@ -16,7 +16,9 @@
     "method-override": "^1.0.0",
     "body-parser": "^1.0.2",
     "express": "^4.0.0",
-    "morgan": "^1.0.0"
+    "morgan": "^1.0.0",
+    "node-neo4j": "^2.0.0-RC6",
+    "neo4j": "^1.1.0"
   },
   "devDependencies": {
     "mocha": "^1.18.2",
