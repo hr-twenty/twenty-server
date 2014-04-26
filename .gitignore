@@ -5,5 +5,5 @@
 
 *.log
 
-env
+env/secrets.js
 

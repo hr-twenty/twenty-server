@@ -18,7 +18,8 @@
     "express": "^4.0.0",
     "morgan": "^1.0.0",
     "node-neo4j": "^2.0.0-RC6",
-    "neo4j": "^1.1.0"
+    "neo4j": "~1.1.0",
+    "lodash": "~2.4.1"
   },
   "devDependencies": {
     "mocha": "^1.18.2",

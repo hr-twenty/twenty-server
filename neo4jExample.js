@@ -1,6 +1,6 @@
 var neo4j = require("neo4j");
 var db = new neo4j.GraphDatabase(
-  'http://localhost:7474'
+  'http://twenty:r5JqrtqFkkK1AtzxkOyc@twenty.sb01.stations.graphenedb.com:24789'
 );
 
 var node = db.createNode({hello: 'world'});    
@@ -10,4 +10,7 @@ node.save(function (err, node) {
   } else {
     console.log('Node saved to database with id:', node.id);
   }
+  db.getNodeById(node.id, function(err, out){
+    console.log(out.id, out.self, out.exists, out.toJSON());
+  })
 });
