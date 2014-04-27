@@ -14,6 +14,7 @@ exports.create = function (linkedInData, callback) {
     'MERGE (language:Language {name: {languageName}})',
     'MERGE (skill:Skill {skill: {skillName}})',
     'MERGE (school:School {name: {schoolName}})',
+    'MERGE (user) -[:HAS_STACK]-> (:Stack)',
     'MERGE (user) -[:LIVES_IN]-> (location)',
     'MERGE (user) -[:WORKS_IN]-> (industry)',
     'MERGE (user) -[:ROLE_IS]-> (curPosition)',
@@ -78,11 +79,11 @@ exports.del = function (callback) {
 /*--------Interaction Methods-----------*/
 exports.getUserStack = function (userData, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}}), (other:User)',
-    'WHERE user.userId <> other.userId AND NOT (user)-->(other)',
-    'OPTIONAL MATCH (other)-[r:APPROVES]->(user)',
-    'RETURN other, count(r) as approved',
-    'ORDER BY count(r) DESC',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[:STACK_USER]->(other:User)',
+    'WHERE user.userId <> other.userId',
+    'OPTIONAL MATCH (other)-[r1:HAS_STACK]->(os:Stack)-[r2:STACK_USER]->(user)',
+    'RETURN user, us, other, os, count(r2)',
+    'ORDER BY count(r2) DESC',
     'LIMIT 10'
   ].join('\n');
 
@@ -94,18 +95,55 @@ exports.getUserStack = function (userData, callback) {
   });
 };
 
-exports.approve = function (other, callback) {
+exports.approve = function (userData, callback) {
+  var query = [
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[su:STACK_USER]->(other:User {userId:{otherId}})',
+    'OPTIONAL MATCH (other)-[:HAS_STACK]->(:Stack)-[so:STACK_USER]->(user)',
+    'SET su.approved = true',
+    'RETURN user, other, su.approved, so.approved'
+  ].join('\n');
+
+  var params = {
+    userId: userData.userId,
+    otherId: userData.otherId
+  };
+
+  db.query(query, params, function (err, results) {
+    if (err) return callback(err);
+
+    //if both parties have approved, create a conversation node
+    if(results[0]['su.approved'] === true && results[0]['so.approved'] === true){
+      
+      var query2 = [
+        'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
+        'MERGE (user)-[:HAS_CONVERSATION]->(m:Conversation)<-[:HAS_CONVERSATION]-(other)',
+        'RETURN user, other, m'
+      ].join('\n');
+
+      var params2 = {
+        userId: userData.userId,
+        otherId: userData.otherId
+      };
+
+      db.query(query2, params2, function (err, results2) {
+        if (err) return callback(err);
+        callback(err, results2);
+      });
+    }
+
+  });
+};
+
+exports.reject = function (userData, other, callback) {
   var query = [
     'MATCH (user:User {userId}), (other:User {otherId})',
-    'MATCH OPTIONAL (other)-[r:APPROVES]->(user)',
-    //if optional match [r] exists, delete relationship and add -[:CONNECTED_TO]-
-    //otherwise 'MERGE (user)-[:APPROVES]->(other)',
-    'RETURN type(r)'
+    'MERGE (user)-[r:REJECTS]->(other)',
+    'RETURN user, type(r), other'
   ];
 
   var params = {
-    userId: this.id,
-    otherId: other.id
+    userId: userData.userId,
+    otherId: other.userId
   };
 
   db.query(query, params, function (err, results) {
@@ -113,6 +151,7 @@ exports.approve = function (other, callback) {
     callback(err, results);
   });
 };
+
 
 exports.getAllConversations = function(callback){
   var query = [
@@ -146,16 +185,17 @@ exports.getOneConversation = function(callback){
   });
 };
 
-exports.sendMessage = function(other, callback){
+exports.sendMessage = function(data, callback){
   var query = [
-    'MATCH (user:User {userId}) -[rel:CONNECTED_TO]- (other:User {otherId})',
-    'SET rel.',
-    'RETURN other, rel.startDate, rel.conversation'
+    'MATCH (user:User {userId:{userId}) -[rel:CONNECTED_TO]- (other:User {userId:{otherId}})',
+    'SET rel.conversation = {sender:{otherId}, text:{text}, timestamp: timestamp()}',
+    'RETURN other, rel.conversation'
   ].join('\n');
 
   var params = {
-    userId: this.id,
-    otherId: other.id
+    userId: data.userId,
+    otherId: data.otherId,
+    text: data.text
   };
 
   db.query(query, params, function (err, results) {

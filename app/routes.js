@@ -12,8 +12,9 @@ module.exports = function(app) {
   app.del('/user', matchHandlers.deleteUser);
 
 //UserStack
+  app.post('/userStack/approve', matchHandlers.approve);
+  app.post('/userStack/reject', matchHandlers.reject);
   app.get('/userStack', matchHandlers.getUserStack);
-  app.post('/userStack', matchHandlers.approve);
 
 //Messages
   app.get('/conversations/all', matchHandlers.getAllConversations);

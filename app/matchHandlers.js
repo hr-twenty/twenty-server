@@ -38,8 +38,14 @@ exports.getUserStack = function(req, res){
 };
 
 exports.approve = function(req, res){
-  var otherId = req.query.id;
-  User.approve(otherId, generalResponse(res));
+  var userData = req.body;
+  User.approve(userData, generalResponse(res));
+};
+
+exports.reject = function(req, res){
+  var userId = req.body.userId;
+  var otherId = req.body.otherId;
+  User.reject(userId, otherId, generalResponse(res));
 };
 
 //Messages
@@ -52,7 +58,6 @@ exports.getOneConversation = function(req, res){
 };
 
 exports.sendMessage = function(req, res){
-  var otherId = req.query.id;
-  var message = req.query.msg;
-  User.sendMessage(otherId, message, generalResponse(res));
+  var userData = req.query;
+  User.sendMessage(userData, generalResponse(res));
 };
