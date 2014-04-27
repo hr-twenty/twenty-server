@@ -23,7 +23,7 @@ exports.getUserData = function(req, res){
 };
 
 exports.updateUser = function(req, res){
-  var userData = req.query;
+  var userData = req.body;
   User.save(userData, generalResponse(res));
 };
 
@@ -43,21 +43,22 @@ exports.approve = function(req, res){
 };
 
 exports.reject = function(req, res){
-  var userId = req.body.userId;
-  var otherId = req.body.otherId;
-  User.reject(userId, otherId, generalResponse(res));
+  var userData = req.body;
+  User.reject(userData, generalResponse(res));
 };
 
 //Messages
 exports.getAllConversations = function(req, res){
-  User.getAllConversations(generalResponse(res));
+  var userData = req.query;
+  User.getAllConversations(userData, generalResponse(res));
 };
 
 exports.getOneConversation = function(req, res){
-  User.getOneConversation(generalResponse(res));
+  var userData = req.query;
+  User.getOneConversation(userData, generalResponse(res));
 };
 
 exports.sendMessage = function(req, res){
-  var userData = req.query;
+  var userData = req.body;
   User.sendMessage(userData, generalResponse(res));
 };

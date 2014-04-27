@@ -35,7 +35,21 @@ window.approve = function(data){
 };
 
 window.sendMsg = function(data){
-  $.post('/conversations', data, function(err, user){
+  $.post('/conversations/one', data, function(err, user){
+    console.log(err)
+    console.log(user)
+  });
+};
+
+window.getAllMsg = function(data){
+  $.get('/conversations/all', data, function(err, user){
+    console.log(err)
+    console.log(user)
+  });
+};
+
+window.getOneMsg = function(data){
+  $.get('/conversations/one', data, function(err, user){
     console.log(err)
     console.log(user)
   });

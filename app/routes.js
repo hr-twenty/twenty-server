@@ -19,7 +19,7 @@ module.exports = function(app) {
 //Messages
   app.get('/conversations/all', matchHandlers.getAllConversations);
   app.get('/conversations/one', matchHandlers.getOneConversation);
-  app.post('/conversations', matchHandlers.sendMessage);
+  app.post('/conversations/one', matchHandlers.sendMessage);
 
 //LinkedIn
   app.route('/auth/linkedin')

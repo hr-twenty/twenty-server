@@ -1,6 +1,6 @@
 /* global require, exports */
 var neo4j = require('neo4j');
-var db = new neo4j.GraphDatabase('http://twenty2:tbPqL9YHwh75qOYp9rkK@twenty2.sb01.stations.graphenedb.com:24789');
+var db = new neo4j.GraphDatabase('http://twenty:32sWAeLkd1sBjy9yeB0v@twenty.sb01.stations.graphenedb.com:24789');
 
 /*--------User Methods-----------*/
 exports.create = function (linkedInData, callback) {
@@ -36,14 +36,16 @@ exports.create = function (linkedInData, callback) {
   });
 };
 
-exports.get = function (userData, callback) {
+exports.get = function (data, callback) {
   var query = [
     'MATCH (user:User {userId:{userId}})',
     'OPTIONAL MATCH (user)-[rel]->(other)',
     'RETURN user, type(rel), other'
   ].join('\n');
 
-  var params = userData;
+  var params = {
+    userId: data.userId
+  };
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
@@ -77,7 +79,7 @@ exports.del = function (callback) {
 };
 
 /*--------Interaction Methods-----------*/
-exports.getUserStack = function (userData, callback) {
+exports.getUserStack = function (data, callback) {
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[:STACK_USER]->(other:User)',
     'WHERE user.userId <> other.userId',
@@ -87,15 +89,37 @@ exports.getUserStack = function (userData, callback) {
     'LIMIT 10'
   ].join('\n');
 
-  var params = userData;
+  var params = {
+    userId: data.userId
+  };
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
     callback(null, results);
   });
+
+  moarStack(data);
 };
 
-exports.approve = function (userData, callback) {
+var moarStack = function(data){
+  var query = [
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
+    'WHERE user.userId <> other.userId AND NOT (user)-[:HAS_STACK]->(us:Stack)-[:STACK_USER]->(other)',
+    'MERGE (us)-[rel:STACK_USER]->(other)',
+    'MERGE (os)-[:STACK_USER]->(user)',
+    'RETURN count(rel)'
+  ].join('\n');
+
+  var params = {
+    userId: data.userId
+  };
+
+  db.query(query, params, function (err) {
+    if (err) return (err);
+  });
+};
+
+exports.approve = function (data, callback) {
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[su:STACK_USER]->(other:User {userId:{otherId}})',
     'OPTIONAL MATCH (other)-[:HAS_STACK]->(:Stack)-[so:STACK_USER]->(user)',
@@ -104,8 +128,8 @@ exports.approve = function (userData, callback) {
   ].join('\n');
 
   var params = {
-    userId: userData.userId,
-    otherId: userData.otherId
+    userId: data.userId,
+    otherId: data.otherId
   };
 
   db.query(query, params, function (err, results) {
@@ -121,8 +145,8 @@ exports.approve = function (userData, callback) {
       ].join('\n');
 
       var params2 = {
-        userId: userData.userId,
-        otherId: userData.otherId
+        userId: data.userId,
+        otherId: data.otherId
       };
 
       db.query(query2, params2, function (err, results2) {
@@ -134,7 +158,7 @@ exports.approve = function (userData, callback) {
   });
 };
 
-exports.reject = function (userData, other, callback) {
+exports.reject = function (data, other, callback) {
   var query = [
     'MATCH (user:User {userId}), (other:User {otherId})',
     'MERGE (user)-[r:REJECTS]->(other)',
@@ -142,7 +166,7 @@ exports.reject = function (userData, other, callback) {
   ];
 
   var params = {
-    userId: userData.userId,
+    userId: data.userId,
     otherId: other.userId
   };
 
@@ -153,14 +177,15 @@ exports.reject = function (userData, other, callback) {
 };
 
 
-exports.getAllConversations = function(callback){
+exports.getAllConversations = function(data, callback){
   var query = [
-    'MATCH (user:User {userId}) -[rel:CONNECTED_TO]- (other:User)',
-    'RETURN other, rel'
+    'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User)',
+    'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
+    'RETURN user, other, m'
   ].join('\n');
 
   var params = {
-    userId: this.id
+    userId: data.userId
   };
 
   db.query(query, params, function (err, results) {
@@ -169,14 +194,16 @@ exports.getAllConversations = function(callback){
   });
 };
 
-exports.getOneConversation = function(callback){
+exports.getOneConversation = function(data, callback){
   var query = [
-    'MATCH (user:User {userId}) -[rel:CONNECTED_TO]- (other:User)',
-    'RETURN other, rel'
+    'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}})',
+    'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
+    'RETURN m'
   ].join('\n');
 
   var params = {
-    userId: this.id
+    userId: data.userId,
+    otherId: data.otherId
   };
 
   db.query(query, params, function (err, results) {
@@ -187,15 +214,16 @@ exports.getOneConversation = function(callback){
 
 exports.sendMessage = function(data, callback){
   var query = [
-    'MATCH (user:User {userId:{userId}) -[rel:CONNECTED_TO]- (other:User {userId:{otherId}})',
-    'SET rel.conversation = {sender:{otherId}, text:{text}, timestamp: timestamp()}',
-    'RETURN other, rel.conversation'
+    'MATCH (user:User {userId:{userId}})-->(c:Conversation)<--(other:User {userId:{otherId}})',
+    'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message {sender:{userId}, text:{text}, time:{time}})',
+    'RETURN m'
   ].join('\n');
 
   var params = {
     userId: data.userId,
     otherId: data.otherId,
-    text: data.text
+    text: data.text,
+    time: data.time
   };
 
   db.query(query, params, function (err, results) {
