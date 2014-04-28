@@ -7,7 +7,7 @@ exports.getAllConversations = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User)',
     'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-    'RETURN other, collect(m) as messages'
+    'RETURN other, collect(m) as messages, c.connectDate as connectDate'
   ].join('\n');
 
   var params = {
@@ -16,14 +16,20 @@ exports.getAllConversations = function(data, callback){
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
-    // var finalResults = results.map(function(obj){
-    //   return {
-    //     sender:obj.m.data.sender,
-    //     text:obj.m.data.text,
-    //     time:obj.m.data.time
-    //   };
-    // });
-    callback(err, results);
+    var finalResults = results.map(function(obj){
+      obj.user = params.userId;
+      obj.other = obj.other.data.userId;
+      obj.connectDate = obj.connectDate;
+      obj.messages = obj.messages.map(function(obj2){
+        return {
+          sender:obj2.data.sender,
+          text:obj2.data.text,
+          time:obj2.data.time
+        };
+      });
+      return obj;
+    });
+    callback(err, finalResults);
   });
 };
 
@@ -31,7 +37,7 @@ exports.getOneConversation = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}})',
     'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-    'RETURN m'
+    'RETURN c.connectDate as connectDate, m'
   ].join('\n');
 
   var params = {
@@ -42,11 +48,15 @@ exports.getOneConversation = function(data, callback){
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
     var finalResults = results.map(function(obj){
-      return {
+      obj.user = params.userId;
+      obj.other = params.otherId;
+      obj.connectDate = obj.connectDate;
+      obj.messages = {
         sender:obj.m.data.sender,
         text:obj.m.data.text,
         time:obj.m.data.time
       };
+      return obj;
     });
     callback(err, finalResults);
   });

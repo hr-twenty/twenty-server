@@ -66,6 +66,7 @@ exports.approve = function (data, callback) {
       var query2 = [
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
         'MERGE (user)-[:HAS_CONVERSATION]->(m:Conversation)<-[:HAS_CONVERSATION]-(other)',
+        'SET m.connectDate = timestamp()',
         'RETURN user, other, m'
       ].join('\n');
 
