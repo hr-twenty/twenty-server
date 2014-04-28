@@ -40,7 +40,7 @@ exports.get = function (data, callback) {
   var query = [
     'MATCH (user:User {userId:{userId}})',
     'OPTIONAL MATCH (user)-[rel]->(other)',
-    'RETURN user, type(rel), other'
+    'RETURN type(rel) as relationship, other'
   ].join('\n');
 
   var params = {
@@ -49,7 +49,13 @@ exports.get = function (data, callback) {
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
-    callback(err, results);
+    var finalResults = results.map(function(obj){
+      return {
+        data:obj.other.data,
+        relationship:obj.relationship
+      };
+    });
+    callback(err, finalResults);
   });
 };
 

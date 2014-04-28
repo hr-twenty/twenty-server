@@ -7,7 +7,7 @@ exports.getAllConversations = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User)',
     'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-    'RETURN user, other, m'
+    'RETURN other, collect(m) as messages'
   ].join('\n');
 
   var params = {
@@ -16,6 +16,13 @@ exports.getAllConversations = function(data, callback){
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
+    // var finalResults = results.map(function(obj){
+    //   return {
+    //     sender:obj.m.data.sender,
+    //     text:obj.m.data.text,
+    //     time:obj.m.data.time
+    //   };
+    // });
     callback(err, results);
   });
 };
@@ -34,7 +41,14 @@ exports.getOneConversation = function(data, callback){
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
-    callback(err, results);
+    var finalResults = results.map(function(obj){
+      return {
+        sender:obj.m.data.sender,
+        text:obj.m.data.text,
+        time:obj.m.data.time
+      };
+    });
+    callback(err, finalResults);
   });
 };
 
