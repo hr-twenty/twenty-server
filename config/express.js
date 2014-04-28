@@ -20,5 +20,5 @@ module.exports = function(app) {
   app.use(cookieParser());
   app.use(session({ secret: 'my secret' }));
 
-  app.use(env.cors.allowCrossDomain);
+  app.use(require('./cors'));
 };
