@@ -5,13 +5,17 @@ module.exports = function(db){
     //pick one to put user in
     var query = [
       'MATCH (user:User {userId})-->(:Skill)<--(peer:User)-->(cluster:Cluster)',
-      'RETURN DISTINCT cluster'
+      'RETURN cluster.id, count(peer) ORDER BY count(peer) DESC'
     ].join(' ');
 
     var params = {
       userId: id
     };
 
-    db.query(query, params, callback);
+    db.query(query, params, function(results){
+      callback(results[0][0]);
+    });
+
+    return this;
   };
 };

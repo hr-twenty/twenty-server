@@ -11,16 +11,13 @@
     ...
   }
 */
-var scoring = function(me, you, formula, clusterMod){
+var scoring = function(me, you, formula){
   var total = 0;
   for (var type in formula){
     if (typeof me[type] === 'object'){
-      total += scoring(me[type], you[type], formula[type], clusterMod)
+      total += scoring(me[type], you[type], formula[type])
     } else {
       var sign = you[type] ? 1 : -1;
-      if (criteria === 'clusterMod'){
-        sign = clusterMod;
-      }
       total += sign * formula[type];
     }
   }
@@ -28,9 +25,9 @@ var scoring = function(me, you, formula, clusterMod){
 };
 
 module.exports = function(){
-  return function(me, myFormula, you, yourFormula, clusterMod){
+  return function(me, myFormula, you, yourFormula){
     return 
-      scoring(me, you, myFormula, clusterMod) + 
-      scoring(you, me, yourFormula, clusterMod);
+      scoring(me, you, myFormula) + 
+      scoring(you, me, yourFormula);
   };
 }
