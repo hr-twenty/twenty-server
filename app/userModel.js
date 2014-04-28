@@ -53,7 +53,7 @@ exports.get = function (data, callback) {
   });
 };
 
-exports.save = function (callback) {
+exports.update = function (callback) {
   this._node.save(function (err) {
     callback(err);
   });
@@ -78,159 +78,8 @@ exports.del = function (callback) {
   });
 };
 
-/*--------Interaction Methods-----------*/
-exports.getUserStack = function (data, callback) {
-  var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[:STACK_USER]->(other:User)',
-    'WHERE user.userId <> other.userId',
-    'OPTIONAL MATCH (other)-[r1:HAS_STACK]->(os:Stack)-[r2:STACK_USER]->(user)',
-    'RETURN user, us, other, os, count(r2)',
-    'ORDER BY count(r2) DESC',
-    'LIMIT 10'
-  ].join('\n');
-
-  var params = {
-    userId: data.userId
-  };
-
-  db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-    callback(null, results);
-  });
-
-  moarStack(data);
-};
-
-var moarStack = function(data){
-  var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
-    'WHERE user.userId <> other.userId AND NOT (user)-[:HAS_STACK]->(us:Stack)-[:STACK_USER]->(other)',
-    'MERGE (us)-[rel:STACK_USER]->(other)',
-    'MERGE (os)-[:STACK_USER]->(user)',
-    'RETURN count(rel)'
-  ].join('\n');
-
-  var params = {
-    userId: data.userId
-  };
-
-  db.query(query, params, function (err) {
-    if (err) return (err);
-  });
-};
-
-exports.approve = function (data, callback) {
-  var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[su:STACK_USER]->(other:User {userId:{otherId}})',
-    'OPTIONAL MATCH (other)-[:HAS_STACK]->(:Stack)-[so:STACK_USER]->(user)',
-    'SET su.approved = true',
-    'RETURN user, other, su.approved, so.approved'
-  ].join('\n');
-
-  var params = {
-    userId: data.userId,
-    otherId: data.otherId
-  };
-
-  db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-
-    //if both parties have approved, create a conversation node
-    if(results[0]['su.approved'] === true && results[0]['so.approved'] === true){
-      
-      var query2 = [
-        'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
-        'MERGE (user)-[:HAS_CONVERSATION]->(m:Conversation)<-[:HAS_CONVERSATION]-(other)',
-        'RETURN user, other, m'
-      ].join('\n');
-
-      var params2 = {
-        userId: data.userId,
-        otherId: data.otherId
-      };
-
-      db.query(query2, params2, function (err, results2) {
-        if (err) return callback(err);
-        callback(err, results2);
-      });
-    }
-
-  });
-};
-
-exports.reject = function (data, other, callback) {
-  var query = [
-    'MATCH (user:User {userId}), (other:User {otherId})',
-    'MERGE (user)-[r:REJECTS]->(other)',
-    'RETURN user, type(r), other'
-  ];
-
-  var params = {
-    userId: data.userId,
-    otherId: other.userId
-  };
-
-  db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-    callback(err, results);
-  });
-};
 
 
-exports.getAllConversations = function(data, callback){
-  var query = [
-    'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User)',
-    'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-    'RETURN user, other, m'
-  ].join('\n');
-
-  var params = {
-    userId: data.userId
-  };
-
-  db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-    callback(err, results);
-  });
-};
-
-exports.getOneConversation = function(data, callback){
-  var query = [
-    'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}})',
-    'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-    'RETURN m'
-  ].join('\n');
-
-  var params = {
-    userId: data.userId,
-    otherId: data.otherId
-  };
-
-  db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-    callback(err, results);
-  });
-};
-
-exports.sendMessage = function(data, callback){
-  var query = [
-    'MATCH (user:User {userId:{userId}})-->(c:Conversation)<--(other:User {userId:{otherId}})',
-    'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message {sender:{userId}, text:{text}, time:{time}})',
-    'RETURN m'
-  ].join('\n');
-
-  var params = {
-    userId: data.userId,
-    otherId: data.otherId,
-    text: data.text,
-    time: data.time
-  };
-
-  db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-    callback(err, results);
-  });
-};
 
 // // calls callback w/ (err, following, others) where following is an array of
 // // users this user follows, and others is all other users minus him/herself.

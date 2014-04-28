@@ -1,25 +1,27 @@
 /* global require */
 var linkedin = require('../config/linkedin');
 var https = require('https');
-var matchHandlers = require('./matchHandlers');
+var userHandlers = require('./userHandlers');
+var stackHandlers = require('./stackHandlers');
+var messageHandlers = require('./messageHandlers');
 
 module.exports = function(app) {
 
 //Users
-  app.get('/user', matchHandlers.getUserData);
-  app.post('/user', matchHandlers.createNewUser);
-  app.put('/user', matchHandlers.updateUser);
-  app.del('/user', matchHandlers.deleteUser);
+  app.get('/user', userHandlers.getUserData);
+  app.post('/user', userHandlers.createNewUser);
+  app.put('/user', userHandlers.updateUser);
+  app.del('/user', userHandlers.deleteUser);
 
 //UserStack
-  app.post('/userStack/approve', matchHandlers.approve);
-  app.post('/userStack/reject', matchHandlers.reject);
-  app.get('/userStack', matchHandlers.getUserStack);
+  app.post('/userStack/approve', stackHandlers.approve);
+  app.post('/userStack/reject', stackHandlers.reject);
+  app.get('/userStack', stackHandlers.getStack);
 
 //Messages
-  app.get('/conversations/all', matchHandlers.getAllConversations);
-  app.get('/conversations/one', matchHandlers.getOneConversation);
-  app.post('/conversations/one', matchHandlers.sendMessage);
+  app.get('/conversations/all', messageHandlers.getAllConversations);
+  app.get('/conversations/one', messageHandlers.getOneConversation);
+  app.post('/conversations/one', messageHandlers.sendMessage);
 
 //LinkedIn
   app.route('/auth/linkedin')
