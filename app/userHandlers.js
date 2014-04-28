@@ -2,6 +2,7 @@
 var User = require('./userModel');
 
 var generalResponse = function(res){
+
   return function(err, data){
     if(err){
       res.send(500, err);
