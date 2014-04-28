@@ -1,11 +1,9 @@
 module.exports =  function(req, res, next){
-  res.headers = {
-    'access-control-allow-origin': '*',
-    'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'access-control-allow-headers': '*',
-    'access-control-max-age': 10, // Seconds.
-    'Content-Type': 'application/json'
-  };
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, Content-Type, Accept, X-Requested-With');
+  res.header('Access-Control-Max-Age', 10); // Seconds.
+  res.header('Content-Type', 'application/json');
   console.log('hit cors!')
   next();
 };
