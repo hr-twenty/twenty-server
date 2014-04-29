@@ -81,7 +81,7 @@ exports.sendMessage = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})-->(c:Conversation)<--(other:User {userId:{otherId}})',
     'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message {sender:{userId}, text:{text}, time:{time}})',
-    'RETURN m'
+    'RETURN null'
   ].join('\n');
 
   var params = {
@@ -92,7 +92,6 @@ exports.sendMessage = function(data, callback){
   };
 
   db.query(query, params, function (err, results) {
-    if (err) return callback(err);
     callback(err, results);
   });
 };

@@ -5,13 +5,13 @@ var db = new neo4j.GraphDatabase('http://twenty:32sWAeLkd1sBjy9yeB0v@twenty.sb01
 /*--------Stack Methods-----------*/
 exports.getStack = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[:STACK_USER]->(other:User)',
-    'OPTIONAL MATCH (other)-[:HAS_STACK]->(:Stack)-[r1:STACK_USER]->(user)',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(:Stack)-[r1:STACK_USER]->(user)',
+    'WHERE r1.rejected = false',
     'OPTIONAL MATCH (other)-[r2]->(otherInfo)',
     'WHERE type(r2) <> "HAS_CONVERSATION"',
     'AND type(r2) <> "HAS_STACK"',
     'RETURN other, collect(type(r2)) as relationships, collect(otherInfo) as otherNodeData, r1.approved as approved',
-    'ORDER BY r1.approved'
+    'ORDER BY r1.approved DESC'
   ].join('\n');
 
   var params = {
@@ -46,8 +46,12 @@ var moarStack = function(data){
     'OPTIONAL MATCH (os)-[su:STACK_USER]->(user)',
     'WHERE user.userId <> other.userId',
     'AND NOT (user)-[:HAS_STACK]->(us:Stack)-[:STACK_USER]->(other)',
-    'MERGE (us)-[:STACK_USER]->(other)',
-    'MERGE (os)-[:STACK_USER]->(user)',
+    'MERGE (us)-[r1:STACK_USER]->(other)',
+      'ON CREATE SET r1.approved = false',
+      'ON CREATE SET r1.rejected = false',
+    'MERGE (os)-[r2:STACK_USER]->(user)',
+      'ON CREATE SET r2.approved = false',
+      'ON CREATE SET r2.rejected = false',
     'RETURN null'
   ].join('\n');
 
@@ -65,7 +69,7 @@ exports.approve = function (data, callback) {
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[su:STACK_USER]->(other:User {userId:{otherId}})',
     'OPTIONAL MATCH (other)-[:HAS_STACK]->(:Stack)-[so:STACK_USER]->(user)',
     'SET su.approved = true',
-    'RETURN user, other, su.approved, so.approved'
+    'RETURN su.approved, so.approved'
   ].join('\n');
 
   var params = {
@@ -91,8 +95,7 @@ exports.approve = function (data, callback) {
         otherId: data.otherId
       };
 
-      db.query(query2, params2, function (err, results2) {
-        if (err) return callback(err);
+      db.query(query2, params2, function (err, results2) {        
         callback(err, results2);
       });
     }
@@ -113,7 +116,6 @@ exports.reject = function (data, callback) {
   };
 
   db.query(query, params, function (err, results) {
-    if (err) return callback(err);
     callback(err, results);
   });
 };
