@@ -1,10 +1,28 @@
-//var linkedin = require('../config/linkedin'),
+/* global require */
 var querystring = require('querystring'),
-    request = require('request');
+    request = require('request'),
+    userHandlers = require('./userHandlers'),
+    stackHandlers = require('./stackHandlers'),
+    messageHandlers = require('./messageHandlers');
 
 module.exports = function(app, passport) {
+  //Users
+  app.get('/user', userHandlers.getUserData);
+  app.post('/user', userHandlers.createNewUser);
+  app.put('/user', userHandlers.updateUser);
+  app.del('/user', userHandlers.deleteUser);
 
-  // Authentication routes
+  //UserStack
+  app.post('/userStack/approve', stackHandlers.approve);
+  app.post('/userStack/reject', stackHandlers.reject);
+  app.get('/userStack', stackHandlers.getStack);
+
+  //Messages
+  app.get('/conversations/all', messageHandlers.getAllConversations);
+  app.get('/conversations/one', messageHandlers.getOneConversation);
+  app.post('/conversations/one', messageHandlers.sendMessage);
+
+  //LinkedIn
   app.route('/auth/linkedin')
   .get(
     passport.authenticate('linkedin', { state: 'SOME STATE' })
