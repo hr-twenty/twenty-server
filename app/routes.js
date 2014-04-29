@@ -39,6 +39,7 @@ module.exports = function(app, passport) {
       oauth2AccessToken;
 
     request(url, function(error, response, body) {
+      console.log(body);
       res.send(body);
     });
   });
