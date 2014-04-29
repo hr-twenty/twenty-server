@@ -24,14 +24,29 @@ exports.create = function (linkedInData, callback) {
     'MERGE (user) -[:HAS_SKILL]-> (skill)',
     'MERGE (user) -[:PROFICIENCY {level: {languageProficiency}}]-> (language)',
     'MERGE (user) -[:ATTENDED {fieldOfStudy: {schoolFieldOfStudy}, startDate: {schoolStartDate},endDate: {schoolEndDate}}]-> (school)',
-    'RETURN user, location, industry, curPosition, curCompany, companySize, language, skill, school'
+    'WITH (user)',
+    'MATCH (user)-[r]->(otherNode)',
+    'WHERE type(r) <> "HAS_STACK"',
+    'RETURN user, collect(type(r)) as relationships, collect(otherNode) as otherNodeData'
   ].join('\n');
 
   var params = linkedInData;
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
-    callback(err, results[0]);
+    var finalResults = results.map(function(obj){
+      var updatedObj = {};
+      //get user data
+      for(var key in obj.user.data){
+        updatedObj[key] = obj.user.data[key];
+      }
+      //get all relationships
+      for(var i = 0; i < obj.relationships.length; i++){
+        updatedObj[obj.relationships[i]] = obj.otherNodeData[i].data;
+      }
+      return updatedObj;
+    });    
+    callback(err, finalResults);
   });
 };
 
