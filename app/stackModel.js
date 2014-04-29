@@ -11,9 +11,10 @@ exports.getStack = function (data, callback) {
     'WHERE type(r3) <> "HAS_CONVERSATION"',
     'AND type(r3) <> "HAS_STACK"',
     'AND type(r3) <> "STACK_USER"',
-    'AND type(r3) <> "APPROVES"',
+    'AND type(r3) <> "APPROVED"',
     'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData, type(r2) as otherToUserRel',
-    'ORDER BY type(r2)'
+    'ORDER BY type(r2)',
+    'LIMIT 10'
   ].join('\n');
 
   var params = {
@@ -35,10 +36,14 @@ exports.getStack = function (data, callback) {
       }
       return updatedObj;
     });
+
+    if(results.length < 10){
+      moarStack(data);
+    }
+    
     callback(null, finalResults);
   });
 
-  // moarStack(data);
 };
 
 //Add more users to this user's Stack
@@ -72,8 +77,8 @@ exports.approve = function (data, callback) {
     'OPTIONAL MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     'DELETE r1',
     'WITH r2, us, other',
-    'MERGE (us)-[r3:APPROVES]->(other)',
-    'RETURN type(r2) as otherApproves'
+    'MERGE (us)-[r3:APPROVED]->(other)',
+    'RETURN type(r2) as otherToUserRel'
   ].join('\n');
 
   var params = {
@@ -84,7 +89,7 @@ exports.approve = function (data, callback) {
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
     // if both parties have approved, create a conversation node
-    if(results[0]['otherApproves'] === true){
+    if(results[0].otherToUserRel === 'APPROVED'){
       
       var query2 = [
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
@@ -101,6 +106,8 @@ exports.approve = function (data, callback) {
       db.query(query2, params2, function (err, results2) {        
         callback(err, results2);
       });
+    } else {
+      callback(err, results);
     }
 
   });
@@ -108,8 +115,10 @@ exports.approve = function (data, callback) {
 
 exports.reject = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[su:STACK_USER]->(other:User {userId:{otherId}})',
-    'SET su.rejected = true',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1:STACK_USER]->(other:User {userId:{otherId}})',
+    'DELETE r1',
+    'WITH us, other',
+    'MERGE (us)-[:REJECTED]->(other)',
     'RETURN null'
   ].join('\n');
 
