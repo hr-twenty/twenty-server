@@ -45,12 +45,14 @@ exports.getOneConversation = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}})',
     'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
+    'WHERE m.time > {mostRecentMsg}',
     'RETURN other, c.connectDate as connectDate, collect(m) as messages'
   ].join('\n');
 
   var params = {
     userId: data.userId,
-    otherId: data.otherId
+    otherId: data.otherId,
+    mostRecentMsg: data.mostRecentMsg
   };
 
   db.query(query, params, function (err, results) {
