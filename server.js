@@ -4,7 +4,7 @@ var express = require('express'),
     linkedin = require('./config/linkedin'),
     app = express();
 
-require('./config/express')(app, express, config);
+require('./config/express')(app, express, env);
 require('./config/passport')(app, passport, linkedin);
 require('./app/routes')(app, passport);
 
