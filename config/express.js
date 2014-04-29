@@ -16,7 +16,7 @@ module.exports = function(app, express, env) {
   app.use(bodyParser());
   app.use(methodOverride());
   app.use(session({ secret: 'my secret' }));
-
   app.use(express.static(path.join(appRoot, 'public')));
-};
 
+  app.use(require('./cors'));
+};
