@@ -1,6 +1,6 @@
 var match = function(id, callback){
   var query = [
-    'MATCH (user:User {userId})-->(:Skill)<--(peer:User)-->(cluster:Cluster)',
+    'MATCH (user:User {userId: "{userId}"})-->(:Skill)<--(peer:User)-->(cluster:Cluster)',
     'RETURN cluster.id, count(peer) ORDER BY count(peer) DESC'
   ].join(' ');
 
@@ -13,9 +13,9 @@ var match = function(id, callback){
 
 var create = function(id, callback){
   var query = [
-    'MATCH (user:User {userId})',
+    'MATCH (user:User {userId: "{userId}"})',
     'CREATE (cluster:Cluster), (user)-[:BELONGS_TO]->(cluster)',
-    'RETURN cluster.id'
+    'RETURN cluster.clusterIndex'
   ].join(' ');
 
   var params = {
