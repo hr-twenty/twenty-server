@@ -21,6 +21,8 @@ exports.getAllConversations = function(data, callback){
       obj.user = params.userId;
       obj.other = {
         userId: obj.other.data.userId,
+        firstName: obj.other.data.firstName,
+        lastName: obj.other.data.lastName,
         picture: obj.other.data.picture,
         company: obj.company.data.name
       };
@@ -43,7 +45,7 @@ exports.getOneConversation = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}})',
     'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-    'RETURN c.connectDate as connectDate, collect(m) as messages'
+    'RETURN other, c.connectDate as connectDate, collect(m) as messages'
   ].join('\n');
 
   var params = {
@@ -55,7 +57,12 @@ exports.getOneConversation = function(data, callback){
     if (err) return callback(err);
     var finalResults = results.map(function(obj){
       obj.user = params.userId;
-      obj.other = params.otherId;
+      obj.other = {
+        userId: obj.other.data.userId,
+        firstName: obj.other.data.firstName,
+        lastName: obj.other.data.lastName,
+        picture: obj.other.data.picture
+      };
       obj.connectDate = obj.connectDate;
       obj.messages = obj.messages.map(function(obj2){
         return {
