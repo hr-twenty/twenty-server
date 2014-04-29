@@ -1,3 +1,4 @@
+/* global module, db */
 var match = function(id, callback){
   var query = [
     'MATCH (user:User {userId: "{userId}"})-->(:Skill)<--(peer:User)-->(cluster:Cluster)',
@@ -9,7 +10,7 @@ var match = function(id, callback){
   };
 
   db.query(query, params, callback);
-}
+};
 
 var create = function(id, callback){
   var query = [
@@ -23,7 +24,7 @@ var create = function(id, callback){
   };
 
   db.query(query, params, callback);
-}
+};
 
 module.exports = function(db){
   return function(id, callback){
@@ -34,7 +35,7 @@ module.exports = function(db){
       if (results.length === 0){
         create(id, function(id){
           callback(id);
-        })
+        });
       } else {
         callback(results[0][0]);
       }

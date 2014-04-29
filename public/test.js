@@ -28,7 +28,6 @@ window.retrieveStack = function(data){
   $.get('/userStack', data, function(err, user){
     console.log(err)
     console.log(user)
-    return user;
   });
 };
 

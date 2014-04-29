@@ -45,7 +45,7 @@ exports.create = function (linkedInData, callback) {
         updatedObj[obj.relationships[i]] = obj.otherNodeData[i].data;
       }
       return updatedObj;
-    });    
+    });
     callback(err, finalResults);
   });
 };

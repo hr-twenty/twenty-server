@@ -1,5 +1,6 @@
+/* global require, module */
 module.exports = function(db){
-  var db = require('../db');
+  var db = db || require('../db');
   return {
     /*
       function(id, callback)

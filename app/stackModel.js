@@ -1,16 +1,17 @@
 /* global require, exports */
 var db = require('./db');
+var matchMaker = require('./matchmaker/matchmaker')();
 
 /*--------Stack Methods-----------*/
 exports.getStack = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(:Stack)-[r1:STACK_USER]->(user)',
-    'WHERE r1.rejected = false',
-    'OPTIONAL MATCH (other)-[r2]->(otherInfo)',
-    'WHERE type(r2) <> "HAS_CONVERSATION"',
-    'AND type(r2) <> "HAS_STACK"',
-    'RETURN other, collect(type(r2)) as relationships, collect(otherInfo) as otherNodeData, r1.approved as approved',
-    'ORDER BY r1.approved DESC'
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(os:Stack)-[r1:STACK_USER]->(user)',
+    'OPTIONAL MATCH (os)-[r2:APPROVES]->(otherInfo)',
+    'OPTIONAL MATCH (other)-[r3]->(otherInfo)',
+    'WHERE type(r3) <> "HAS_CONVERSATION"',
+    'AND type(r3) <> "HAS_STACK"',
+    'RETURN other, collect(type(r2)) as relationships, collect(otherInfo) as otherNodeData, r2',
+    'ORDER BY r2 DESC'
   ].join('\n');
 
   var params = {
@@ -40,17 +41,17 @@ exports.getStack = function (data, callback) {
 
 //Add more users to this user's Stack
 var moarStack = function(data){
+
+  // matchMaker.matches(data.userId, function(results2){
+    
+  // })
+
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
-    'OPTIONAL MATCH (os)-[su:STACK_USER]->(user)',
     'WHERE user.userId <> other.userId',
-    'AND NOT (user)-[:HAS_STACK]->(us:Stack)-[:STACK_USER]->(other)',
-    'MERGE (us)-[r1:STACK_USER]->(other)',
-      'ON CREATE SET r1.approved = false',
-      'ON CREATE SET r1.rejected = false',
-    'MERGE (os)-[r2:STACK_USER]->(user)',
-      'ON CREATE SET r2.approved = false',
-      'ON CREATE SET r2.rejected = false',
+    'AND NOT (us)-->(other)',
+    'MERGE (us)-[:STACK_USER]->(other)',
+    'MERGE (os)-[:STACK_USER]->(user)',
     'RETURN null'
   ].join('\n');
 
@@ -65,10 +66,12 @@ var moarStack = function(data){
 
 exports.approve = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[su:STACK_USER]->(other:User {userId:{otherId}})',
-    'OPTIONAL MATCH (other)-[:HAS_STACK]->(:Stack)-[so:STACK_USER]->(user)',
-    'SET su.approved = true',
-    'RETURN su.approved, so.approved'
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1:STACK_USER]->(other:User {userId:{otherId}})',
+    'OPTIONAL MATCH (other)-[:HAS_STACK]->(:Stack)-[r2:STACK_USER]->(user)',
+    'DELETE r1',
+    'WITH us, other',
+    'MERGE (us)-[r3:APPROVES]->(other)',
+    'RETURN type(r2), type(r3)'
   ].join('\n');
 
   var params = {
@@ -78,26 +81,26 @@ exports.approve = function (data, callback) {
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
-
+console.log(results)
     //if both parties have approved, create a conversation node
-    if(results[0]['su.approved'] === true && results[0]['so.approved'] === true){
+    // if(results[0]['su.approved'] === true && results[0]['so.approved'] === true){
       
-      var query2 = [
-        'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
-        'MERGE (user)-[:HAS_CONVERSATION]->(m:Conversation)<-[:HAS_CONVERSATION]-(other)',
-        'SET m.connectDate = timestamp()',
-        'RETURN null'
-      ].join('\n');
+    //   var query2 = [
+    //     'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
+    //     'MERGE (user)-[:HAS_CONVERSATION]->(m:Conversation)<-[:HAS_CONVERSATION]-(other)',
+    //     'SET m.connectDate = timestamp()',
+    //     'RETURN null'
+    //   ].join('\n');
 
-      var params2 = {
-        userId: data.userId,
-        otherId: data.otherId
-      };
+    //   var params2 = {
+    //     userId: data.userId,
+    //     otherId: data.otherId
+    //   };
 
-      db.query(query2, params2, function (err, results2) {        
-        callback(err, results2);
-      });
-    }
+    //   db.query(query2, params2, function (err, results2) {        
+        callback(err, results);
+      // });
+    // }
 
   });
 };
