@@ -12,6 +12,18 @@ window.postUser = function(data){
   });
 };
 
+window.deleteUser = function(data){
+  $.ajax({
+    url: '/user',
+    data: data,
+    type: 'DELETE'
+    })
+  .done(function(err, user){
+    console.log(err)
+    console.log(user)
+  });
+};
+
 window.retrieveStack = function(data){
   $.get('/userStack', data, function(err, user){
     console.log(err)
@@ -54,3 +66,4 @@ window.getOneMsg = function(data){
     console.log(user)
   });
 };
+
