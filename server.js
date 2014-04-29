@@ -1,16 +1,14 @@
 var express = require('express'),
     passport = require('passport'),
-    env = require('./config/env'),
-    linkedin = require('./config/linkedin'),
+    env = require('./config/env')(process.env.NODE_ENV || 'development'),
     app = express();
 
 require('./config/express')(app, express, env);
-require('./config/passport')(app, passport, linkedin);
+require('./config/passport')(app, passport);
 require('./app/routes')(app, passport);
 
 var server = app.listen(app.get('port'), function() {
-  console.log('Started in env ', process.env.NODE_ENV);
-  console.log('Listening on port', app.get('port'), '...');
+  console.log('Server listening on port %d in %s environment...', env.port, env.envType);
 });
 
 

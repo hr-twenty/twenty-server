@@ -3,7 +3,8 @@ var querystring = require('querystring'),
     request = require('request'),
     userHandlers = require('./userHandlers'),
     stackHandlers = require('./stackHandlers'),
-    messageHandlers = require('./messageHandlers');
+    messageHandlers = require('./messageHandlers'),
+    userModel = require('./userModel');
 
 module.exports = function(app, passport) {
   //Users
@@ -22,23 +23,14 @@ module.exports = function(app, passport) {
   app.get('/conversations/one', messageHandlers.getOneConversation);
   app.post('/conversations/one', messageHandlers.sendMessage);
 
-  //LinkedIn
-  app.route('/auth/linkedin')
-  .get(
-    passport.authenticate('linkedin', { state: 'SOME STATE' })
-  );
-
-  app.route('/auth/linkedin/callback')
-  .get(
-    passport.authenticate('linkedin', { failureRedirect: '/login' }),
-    function(req, res) {
-      res.redirect('/');
-    }
-  );
+  // Sign in/out
+  app.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect('/');
+  });
 
   // Linkedin api user call
-  app.route('/api/user')
-  .get(function(req, res) {
+  app.get('/api/user', function(req, res) {
     var oauth2AccessToken = querystring.stringify({
       oauth2_access_token: req.session.accessToken
     });
@@ -53,11 +45,39 @@ module.exports = function(app, passport) {
       'languages:(language:(name)),' +
       'skills:(skill:(name)),' +
       'educations:(school-name)' +
-      ')?' +
+      ')?format=json&' +
       oauth2AccessToken;
 
     request(url, function(error, response, body) {
-      res.send(body);
+
+      body = JSON.parse(body);
+      var queryParams = {
+        userId: body.id,
+        firstName: body.firstName,
+        lastName: body.lastName,
+        headline: body.headline,
+        picture: body.pictureUrl || '',
+        numConnections: body.numConnections,
+        locationCity: body.location.name,
+        locationCountry: body.location.country.code,
+        industryName: body.industry,
+        curPositionTitle: '',
+        curCompanyName: '',
+        companySize: '',
+        languageName: '',
+        skillName: '',
+        schoolName: '',
+        curCompanyStartDate: '',
+        curCompanyEndDate: '',
+        languageProficiency: '',
+        schoolFieldOfStudy: '',
+        schoolStartDate: '',
+        schoolEndDate: ''
+      };
+
+      userModel.create(queryParams, function(err, finalResults) {
+        res.send(finalResults || err);
+      });
     });
   });
 

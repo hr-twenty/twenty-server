@@ -1,6 +1,5 @@
 /* global require, module */
 var path = require('path'),
-    appRoot = path.normalize(__dirname + '/..'),
     morgan = require('morgan'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
@@ -15,8 +14,10 @@ module.exports = function(app, express, env) {
 
   app.use(bodyParser());
   app.use(methodOverride());
+  app.use(cookieParser());
   app.use(session({ secret: 'my secret' }));
-  app.use(express.static(path.join(appRoot, 'public')));
+
+  app.use(express.static(path.join(env.rootPath, 'public')));
 
   app.use(require('./cors'));
 };

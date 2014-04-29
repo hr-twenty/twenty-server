@@ -1,6 +1,12 @@
-var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy,
+    linkedin = require('./linkedin');
 
-module.exports = function(app, passport, linkedin) {
+
+module.exports = function(app, passport) {
+
+  app.use(passport.initialize());
+  app.use(passport.session());
+
   passport.serializeUser(function(user, done) {
     done(null, user);
   });
@@ -21,7 +27,16 @@ module.exports = function(app, passport, linkedin) {
     });
   }));
 
-  app.use(passport.initialize());
-  app.use(passport.session());
+  app.get('/auth/linkedin',
+    passport.authenticate('linkedin', { state: 'keyboard cat' })
+  );
+
+  app.get('/auth/linkedin/callback',
+    passport.authenticate('linkedin', { failureRedirect: '/login' }),
+    function(req, res) {
+      res.redirect('/api/user');
+    }
+  );
+
 };
 
