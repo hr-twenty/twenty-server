@@ -5,14 +5,15 @@ module.exports = function(db){
       2. users who are cluster-mates of my previous choices
     */
     var query = [
-      'MATCH (user:User {userId})-->(source:Cluster)<--(peer:User), ',
+      //users in my own cluster
+      'MATCH (user:User {userId:"{userId}"})-->(source:Cluster)<--(other:User)',
+      'WHERE (user)-->(:Location)<--(other)',
+      'RETURN DISTINCT other.userId',
+      //users in my cluster-mates's preferred cluster
+      'MATCH (user:User {userId: "{userId}")-->(source:Cluster)<--(peer:User), ',
       '(peer)-->(:Stack)-[:APRROVES]->other-->(target:Cluster)<--(other:User)',
       'WHERE (user)-->(:Location)<--(other) AND NOT (user)-->(:Stack)-[:APRROVES]->(other)',
-      'RETURN DISTINCT other.id',
-      'UNION',
-      'MATCH (user:User {userId})-->(:Stack)-[:APRROVES]->(past:User)-->(target:Cluster)<--(other:User)',
-      'WHERE (user)-->(:Location)<--(other)',
-      'RETURN DISTINCT other.id'
+      'RETURN DISTINCT other.userId',
     ].join(' ');
 
     var params = {
