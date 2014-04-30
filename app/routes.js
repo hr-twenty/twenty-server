@@ -14,6 +14,7 @@ module.exports = function(app) {
 //UserStack
   app.post('/userStack/approve', stackHandlers.approve);
   app.post('/userStack/reject', stackHandlers.reject);
+  app.post('/userStack/reset', stackHandlers.resetStack);
   app.get('/userStack', stackHandlers.getStack);
 
 //Messages

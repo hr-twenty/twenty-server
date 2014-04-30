@@ -45,6 +45,13 @@ window.approve = function(data){
   });
 };
 
+window.resetStack = function(data){
+  $.post('/userStack/reset', data, function(err, user){
+    console.log(err)
+    console.log(user)
+  });
+};
+
 window.sendMsg = function(data){
   $.post('/conversations/one', data, function(err, user){
     console.log(err)

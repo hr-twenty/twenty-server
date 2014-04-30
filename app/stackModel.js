@@ -159,3 +159,21 @@ exports.reject = function (data, callback) {
     callback(err, results);
   });
 };
+
+exports.resetStack = function (data, callback) {
+  var query = [
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User)',
+    'DELETE r1',
+    'WITH us, other',
+    'MERGE (us)-[:STACK_USER]->(other)',
+    'RETURN null'
+  ].join('\n');
+
+  var params = {
+    userId: data.userId
+  };
+
+  db.query(query, params, function (err, results) {
+    callback(err, results);
+  });
+};
