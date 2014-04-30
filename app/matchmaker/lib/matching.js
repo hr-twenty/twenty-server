@@ -38,3 +38,22 @@ module.exports = function(db){
     });
   };
 };
+
+
+//Add more users to this user's Stack if cluster isn't big enough
+var moarStack = function(data){
+  var query = [
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
+    'WHERE user.userId <> other.userId',
+    'AND NOT (us)-->(other)',
+    'RETURN null'
+  ].join('\n');
+
+  var params = {
+    userId: data.userId
+  };
+
+  db.query(query, params, function (err) {
+    if (err) return (err);
+  });
+};
