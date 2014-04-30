@@ -1,5 +1,6 @@
 var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy,
-    linkedin = require('./linkedin');
+    linkedin = require('./linkedin'),
+    User = require('../app/userModel');
 
 
 module.exports = function(app, passport) {
@@ -19,9 +20,45 @@ module.exports = function(app, passport) {
     clientID: linkedin.apiKey,
     clientSecret: linkedin.secretKey,
     callbackURL: linkedin.redirectUri,
-    passReqToCallback: true
   }, function(req, accessToken, refreshToken, profile, done) {
-    req.session.accessToken = accessToken;
+
+    var user = JSON.parse(profile._raw);
+    var queryParams = {
+      userId: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      headline: user.headline,
+      picture: user.pictureUrl || '',
+      numConnections: user.numConnections,
+      locationCity: user.location.name,
+      locationCountry: user.location.country.code,
+      industryName: user.industry,
+      curPositionTitle: '',
+      curCompanyName: '',
+      companySize: '',
+      languageName: '',
+      skillName: '',
+      schoolName: '',
+      curCompanyStartDate: '',
+      curCompanyEndDate: '',
+      languageProficiency: '',
+      schoolFieldOfStudy: '',
+      schoolStartDate: '',
+      schoolEndDate: ''
+    };
+
+    User.get({ userId: profile.id }, function(err, finalResults) {
+      if (err) {
+        User.create(queryParams, function(err, finalResults) {
+          console.log('User created...');
+          console.log(err || finalResults);
+        });
+      } else {
+        // update user
+        console.log('user exists');
+      }
+    });
+
     process.nextTick(function() {
       return done(null, profile);
     });
@@ -34,7 +71,7 @@ module.exports = function(app, passport) {
   app.get('/auth/linkedin/callback',
     passport.authenticate('linkedin', { failureRedirect: '/login' }),
     function(req, res) {
-      res.redirect('/api/user');
+      res.redirect('/user?userId=' + req.user.id);
     }
   );
 
