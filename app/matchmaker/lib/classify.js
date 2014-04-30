@@ -29,15 +29,30 @@ var create = function(db, userId, callback){
   db.query(query, params, callback);
 };
 
+var createRelation = function(userId, clusterIndex, callback){
+  var query = [
+    'MATCH (user:User {userId: "{userId}"})',
+    ', (cluster:Cluster {clusterIndex: "{clusterIndex}"})',
+    'MERGE (user)-[:BELONGS_TO]->(cluster)',
+    'RETURN cluster.clusterIndex'
+  ].join(' ');
+
+  var params = {
+    userId: userId
+    clusterIndex: clusterIndex
+  };
+
+  db.query(query, params, callback);
+}
+
+
 module.exports = function(db){
   return function(userId, callback){
     match(db, userId, function(err, results){
       if (results.length === 0){
-        create(db, userId, function(data){
-          callback(data);
-        });
+        createCluster(db, id, callback(id))
       } else {
-        callback(results[0][0]);
+        createRelation(id, results[0][0], callback)
       }
     });
 
