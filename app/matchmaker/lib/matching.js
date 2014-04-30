@@ -31,9 +31,7 @@ module.exports = function(db){
           userId: obj.other.data.otherId
         };
       });
-      console.log(results)
-      console.log(finalResults)
-
+      
       callback(null, finalResults);
     });
   };
