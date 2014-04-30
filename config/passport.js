@@ -20,6 +20,20 @@ module.exports = function(app, passport) {
     clientID: linkedin.apiKey,
     clientSecret: linkedin.secretKey,
     callbackURL: linkedin.redirectUri,
+    profileFields: [
+      'id',
+      'first-name',
+      'last-name',
+      'headline',
+      'location:(name,country:(code))',
+      'industry',
+      'num-connections',
+      'positions',
+      'picture-url',
+      'languages',
+      'skills',
+      'educations'
+    ]
   }, function(req, accessToken, refreshToken, profile, done) {
 
     var user = JSON.parse(profile._raw);
@@ -28,27 +42,30 @@ module.exports = function(app, passport) {
       firstName: user.firstName,
       lastName: user.lastName,
       headline: user.headline,
-      picture: user.pictureUrl || '',
+      picture: user.pictureUrl,
       numConnections: user.numConnections,
       locationCity: user.location.name,
       locationCountry: user.location.country.code,
       industryName: user.industry,
-      curPositionTitle: '',
-      curCompanyName: '',
-      companySize: '',
+      curPositionTitle: user.positions.values[0].title,
+      curCompanyName: user.positions.values[0].company.name,
+      companySize: user.positions.values[0].company.size,
       languageName: '',
       skillName: '',
       schoolName: '',
-      curCompanyStartDate: '',
-      curCompanyEndDate: '',
+      curCompanyStartDate: user.positions.values[0].startDate.month + '-' + user.positions.values[0].startDate.year,
+      curCompanyEndDate: user.positions.values[0].isCurrent ? 'present' : user.positions.values[0].endDate.month + '-' + user.positions.values[0].endDate.year,
       languageProficiency: '',
       schoolFieldOfStudy: '',
       schoolStartDate: '',
       schoolEndDate: ''
     };
 
+    console.log('profile');
+    console.log(profile._raw);
+    console.log('*********');
     User.get({ userId: profile.id }, function(err, finalResults) {
-      if (err) {
+      if (finalResults.length === 0) {
         User.create(queryParams, function(err, finalResults) {
           console.log('User created...');
           console.log(err || finalResults);
@@ -71,7 +88,7 @@ module.exports = function(app, passport) {
   app.get('/auth/linkedin/callback',
     passport.authenticate('linkedin', { failureRedirect: '/login' }),
     function(req, res) {
-      res.redirect('/user?userId=' + req.user.id);
+      res.redirect('http://localhost:3000/#/main/home/?userId=' + req.user.id);
     }
   );
 
