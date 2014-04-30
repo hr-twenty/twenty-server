@@ -66,3 +66,22 @@ window.getOneMsg = function(data){
   });
 };
 
+
+window.generateLotsaUsers = function(){
+  var i = 0;
+  var firstNames = ['Rob', 'Ian', 'Wesley', 'Eric', 'Phillip', 'Addison'];
+  var lastNames = ['Holmes', 'Lyons', 'Mao', 'Craft', 'Alexander', 'Lee'];
+  var locations = ['San Francisco', 'Los Angeles', 'Chicago'];
+
+
+  while(i < 20){
+    
+
+
+    $.post('/user', data, function(err, user){
+      console.log(err)
+      console.log(user)
+    });
+  }
+
+}

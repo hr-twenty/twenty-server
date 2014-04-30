@@ -11,6 +11,10 @@ var env = require('./env');
 module.exports = function(app) {
   app.set('port', env.port);
   app.use(express.static(path.join(env.rootPath, 'public')));
+  app.use(function(req,res,next){
+    console.log('hit here', req.url);
+    next();
+  })
 
   app.use(morgan('dev'));
 

@@ -37,22 +37,27 @@ exports.getStack = function (data, callback) {
       return updatedObj;
     });
 
-    if(results.length < 10){
-      moarStack(data);
-    }
-    
+    // if(results.length < 10){
+      clusterStack(data);
+    // }
+
     callback(null, finalResults);
   });
 
 };
 
-//Add more users to this user's Stack
+//Add more users to this user's Stack based on cluster
+var clusterStack = function(data){
+  matchMaker.matches(data.userId, function(err, results){
+    results.forEach(function(obj){
+      // addUserToStack(data.userId, obj.otherId);
+      console.log(obj);
+    });
+  });
+};
+
+//Add more users to this user's Stack if cluster isn't big enough
 var moarStack = function(data){
-
-  // matchMaker.matches(data.userId, function(results2){
-    
-  // })
-
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
     'WHERE user.userId <> other.userId',
@@ -70,6 +75,24 @@ var moarStack = function(data){
     if (err) return (err);
   });
 };
+
+var addUserToStack = function(data){
+  var query = [
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User {userId:{otherId}})-[:HAS_STACK]->(os:Stack)',
+    'MERGE (us)-[:STACK_USER]->(other)',
+    'MERGE (os)-[:STACK_USER]->(user)',
+    'RETURN null'
+  ].join('\n');
+
+  var params = {
+    userId: data.userId,
+    otherId: data.otherId
+  };
+
+  db.query(query, params, function (err) {
+    if (err) return (err);
+  });
+}
 
 exports.approve = function (data, callback) {
   var query = [
