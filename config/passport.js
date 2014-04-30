@@ -21,6 +21,7 @@ module.exports = function(app, passport) {
     clientID: linkedin.apiKey,
     clientSecret: linkedin.secretKey,
     callbackURL: linkedin.redirectUri,
+    scope: [ 'r_fullprofile' ],
     profileFields: [
       'id',
       'first-name',
@@ -64,6 +65,24 @@ module.exports = function(app, passport) {
           },
           isCurrent: 'nil'
         }]
+      },
+      skills: {
+        values: [{
+          skill: { name: 'nil' }
+        }]
+      },
+      educations: {
+        values: [{
+          schoolName: 'nil',
+          fieldOfStudy: 'nil',
+          startDate: { year: 'nil' },
+          endDate: { year: 'nil' }
+        }]
+      },
+      languages: {
+        values: [{
+          language: { name: 'nil' }
+        }]
       }
     };
 
@@ -76,13 +95,20 @@ module.exports = function(app, passport) {
       picture: user.pictureUrl,
       numConnections: user.numConnections,
       industryName: user.industry,
-      languageName: '',
-      skillName: '',
-      schoolName: '',
-      languageProficiency: '',
-      schoolFieldOfStudy: '',
-      schoolStartDate: '',
-      schoolEndDate: '',
+
+      languageName: user.languages.values.map(function(obj) {
+        return obj.language.name;
+      }),
+      languageProficiency: 'nil', // Currently don't have any information on how to populate
+
+      skillName: user.skills.values.map(function(obj) {
+        return obj.skill.name;
+      }),
+
+      schoolName: user.educations.values[0].schoolName,
+      schoolFieldOfStudy: user.educations.values[0].fieldOfStudy,
+      schoolStartDate: user.educations.values[0].startDate.year,
+      schoolEndDate: user.educations.values[0].endDate.year,
 
       locationCity: user.location.name,
       locationCountry: user.location.country.code,
