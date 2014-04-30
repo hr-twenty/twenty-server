@@ -36,7 +36,7 @@ module.exports = function(db){
 
       var params = {
         userId: userId,
-        limit: Math.max(30, results.length)
+        limit: Math.max(30, results.length * 0.3)
       };
 
       db.query(query, params, function(err, randomResults){
