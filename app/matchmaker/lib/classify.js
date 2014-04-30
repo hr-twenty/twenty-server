@@ -1,40 +1,39 @@
 /* global module, db */
-var match = function(id, callback){
+var match = function(userId, callback){
+  //find the cluster this user should be associated with
   var query = [
-    'MATCH (user:User {userId: "{userId}"})-->(:Skill)<--(peer:User)-->(cluster:Cluster)',
-    'RETURN cluster.id, count(peer) ORDER BY count(peer) DESC'
+    'MATCH (user:User {userId:{userId}})-[:HAS_SKILL]->(:Skill)<-[:HAS_SKILL]-(peer:User)-[:BELONGS_TO]->(cluster:Cluster)',
+    'RETURN cluster.clusterIndex, count(peer) ORDER BY count(peer) DESC'
   ].join(' ');
 
   var params = {
-    userId: id
+    userId: userId
   };
 
   db.query(query, params, callback);
 };
 
-var create = function(id, callback){
+var create = function(userId, callback){
+  //create a new cluster this user should be associated with
   var query = [
-    'MATCH (user:User {userId: "{userId}"})',
-    'CREATE (cluster:Cluster), (user)-[:BELONGS_TO]->(cluster)',
+    'MERGE (user:User {userId:{userId}})',
+    'CREATE UNIQUE (user)-[:BELONGS_TO]->(cluster:Cluster)',
     'RETURN cluster.clusterIndex'
   ].join(' ');
 
   var params = {
-    userId: id
+    userId: userId
   };
 
   db.query(query, params, callback);
 };
 
 module.exports = function(db){
-  return function(id, callback){
-    //find profiles sharing skills with user
-    //and examine their clusters
-    //pick one to put user in
-    match(id, function(results){
+  return function(userId, callback){
+    match(userId, function(results){
       if (results.length === 0){
-        create(id, function(id){
-          callback(id);
+        create(userId, function(data){
+          callback(data);
         });
       } else {
         callback(results[0][0]);
