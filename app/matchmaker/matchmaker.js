@@ -14,8 +14,8 @@ module.exports = function(db){
     /*
       function(id, callback)
         id: user id
-        callback: function(clusterIndex)
-          clusterIndex: id of belonging cluster
+        callback: function(clusterId)
+          clusterId: id of belonging cluster
     */
     classify: require('./lib/classify')(db),
     

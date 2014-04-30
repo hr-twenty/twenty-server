@@ -5,7 +5,8 @@ var matchMaker = require('./matchmaker/matchmaker')();
 /*--------Stack Methods-----------*/
 exports.getStack = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]',
+    '->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     'WHERE type(r2) <> "REJECTED"',
     'OPTIONAL MATCH (other)-[r3]->(otherInfo)',
     'WHERE type(r3) <> "HAS_CONVERSATION"',
@@ -16,6 +17,7 @@ exports.getStack = function (data, callback) {
     'ORDER BY type(r2)',
     'LIMIT 10'
   ].join('\n');
+
 
   var params = {
     userId: data.userId
@@ -37,9 +39,9 @@ exports.getStack = function (data, callback) {
       return updatedObj;
     });
 
-    // if(results.length < 10){
+    if(results.length < 10){
       clusterStack(data);
-    // }
+    }
 
     callback(null, finalResults);
   });
@@ -49,21 +51,24 @@ exports.getStack = function (data, callback) {
 //Add more users to this user's Stack based on cluster
 var clusterStack = function(data){
   matchMaker.matches(data.userId, function(err, results){
-    results.forEach(function(obj){
-      // addUserToStack(data.userId, obj.otherId);
-      console.log(obj);
-    });
+    if(results.length > 0){
+      results.forEach(function(obj){
+        addOneUserToStack(data.userId, obj.otherId);
+      });
+    } else {
+      addAllUsersToStack(data);
+    }
   });
 };
 
 //Add more users to this user's Stack if cluster isn't big enough
-var moarStack = function(data){
+var addAllUsersToStack = function(data){
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
     'WHERE user.userId <> other.userId',
     'AND NOT (us)-->(other)',
-    'MERGE (us)-[:STACK_USER]->(other)',
-    'MERGE (os)-[:STACK_USER]->(user)',
+    'MERGE (us)-[:STACK_USER]-(other)',
+    'MERGE (os)-[:STACK_USER]-(user)',
     'RETURN null'
   ].join('\n');
 
@@ -76,7 +81,7 @@ var moarStack = function(data){
   });
 };
 
-var addUserToStack = function(data){
+var addOneUserToStack = function(data){
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User {userId:{otherId}})-[:HAS_STACK]->(os:Stack)',
     'MERGE (us)-[:STACK_USER]->(other)',
@@ -92,7 +97,7 @@ var addUserToStack = function(data){
   db.query(query, params, function (err) {
     if (err) return (err);
   });
-}
+};
 
 exports.approve = function (data, callback) {
   var query = [
