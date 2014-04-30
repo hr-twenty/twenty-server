@@ -4,7 +4,7 @@ var _ = require('lodash'),
     User = require('../app/userModel');
 
 
-module.exports = function(app, passport) {
+module.exports = function(app, passport, ip, port) {
 
   app.use(passport.initialize());
   app.use(passport.session());
@@ -17,10 +17,11 @@ module.exports = function(app, passport) {
     done(null, obj);
   });
 
+  console.log(ip + ":" + port + linkedin.redirectUri);
   passport.use(new LinkedInStrategy({
     clientID: linkedin.apiKey,
     clientSecret: linkedin.secretKey,
-    callbackURL: linkedin.redirectUri,
+    callbackURL: 'http://' + ip + ":" + port + linkedin.redirectUri,
     scope: [ 'r_fullprofile' ],
     profileFields: [
       'id',
@@ -136,18 +137,6 @@ module.exports = function(app, passport) {
       return done(null, profile);
     });
   }));
-
-  app.get('/auth/linkedin',
-    passport.authenticate('linkedin', { state: 'keyboard cat' })
-  );
-
-  app.get('/auth/linkedin/callback',
-    passport.authenticate('linkedin', { failureRedirect: '/login' }),
-    function(req, res) {
-      // TODO: don't hardcode the url
-      res.redirect('http://localhost:3000/#/main/home/?userId=' + req.user.id);
-    }
-  );
 
 };
 

@@ -3,7 +3,7 @@ var userHandlers = require('./userHandlers'),
     stackHandlers = require('./stackHandlers'),
     messageHandlers = require('./messageHandlers');
 
-module.exports = function(app) {
+module.exports = function(app, passport) {
 
   app.get('/user', userHandlers.getUserData);
   app.post('/user', userHandlers.createNewUser);
@@ -29,6 +29,18 @@ module.exports = function(app) {
     req.logout();
     res.redirect('/');
   });
+
+  // Passport-linkedin routes
+  app.get('/auth/linkedin',
+    passport.authenticate('linkedin', { state: 'keyboard cat' })
+  );
+
+  app.get('/auth/linkedin/callback',
+    passport.authenticate('linkedin', { failureRedirect: '/login' }),
+    function(req, res) {
+      res.redirect('/#/main/home/?userId=' + req.user.id);
+    }
+  );
 
   // Catch all route
   app.get('/*', function(req, res) {
