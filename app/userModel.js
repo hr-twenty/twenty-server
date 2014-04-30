@@ -1,5 +1,6 @@
 /* global require, exports */
 var db = require('./db');
+var matchMaker = require('./matchmaker/matchmaker')();
 
 /*--------User Methods-----------*/
 exports.create = function (linkedInData, callback) {
@@ -46,6 +47,7 @@ exports.create = function (linkedInData, callback) {
       }
       return updatedObj;
     });
+    matchMaker.classify(linkedInData.userId, function(){});
     callback(err, finalResults);
   });
 };
