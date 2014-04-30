@@ -25,24 +25,21 @@ module.exports = function(db){
     db.query(query, params, function(err, results){
       if (err) return callback(err);
 
-      var random = Math.max(30, results.length)
-
       var query = [
         'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
         'WHERE user.userId <> other.userId',
         'AND NOT (us)-->(other)',
-        'RETURN DISTINCT other.userId as userId LIMIT {limit}'
+        'RETURN DISTINCT other.userId as userId LIMIT 30'
       ].join(' ');
 
       var params = {
-        userId: userId,
-        limit: Math.max(30, results.length * 0.3)
+        userId: userId
       };
 
       db.query(query, params, function(err, randomResults){
         if (err) return callback(err);
         callback(null, results.concat(randomResults));
-      })
+      });
     });
   };
 };

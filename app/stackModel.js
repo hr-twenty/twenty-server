@@ -51,13 +51,37 @@ exports.getStack = function (data, callback) {
 //Add more users to this user's Stack based on cluster
 var clusterStack = function(data){
   matchMaker.matches(data.userId, function(err, results){
-    results.forEach(function(obj){
-      addUserToStack(data.userId, obj.otherId);
-    });
+    if(results.length > 0){
+      results.forEach(function(obj){
+        addOneUserToStack(data.userId, obj.otherId);
+      });
+    } else {
+      addAllUsersToStack(data);
+    }
   });
 };
 
-var addUserToStack = function(data){
+//Add more users to this user's Stack if cluster isn't big enough
+var addAllUsersToStack = function(data){
+  var query = [
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
+    'WHERE user.userId <> other.userId',
+    'AND NOT (us)-->(other)',
+    'MERGE (us)-[:STACK_USER]-(other)',
+    'MERGE (os)-[:STACK_USER]-(user)',
+    'RETURN null'
+  ].join('\n');
+
+  var params = {
+    userId: data.userId
+  };
+
+  db.query(query, params, function (err) {
+    if (err) return (err);
+  });
+};
+
+var addOneUserToStack = function(data){
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User {userId:{otherId}})-[:HAS_STACK]->(os:Stack)',
     'MERGE (us)-[:STACK_USER]->(other)',
