@@ -10,7 +10,7 @@ require('dns').lookup(require('os').hostname(), function(err, ip) {
   require('./app/routes')(app, passport);
 
   var server = app.listen(app.get('port'), function() {
-    console.log('Server listening at %s on port %d in %s environment...', env.ip, env.port, env.envType);
+    console.log('Server listening at %s on port %d in %s environment...', ip, env.port, env.envType);
   });
 
   //for testing

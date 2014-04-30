@@ -17,7 +17,6 @@ module.exports = function(app, passport, ip, port) {
     done(null, obj);
   });
 
-  console.log(ip + ":" + port + linkedin.redirectUri);
   passport.use(new LinkedInStrategy({
     clientID: linkedin.apiKey,
     clientSecret: linkedin.secretKey,
