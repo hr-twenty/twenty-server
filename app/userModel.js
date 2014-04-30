@@ -1,5 +1,6 @@
 /* global require, exports */
 var db = require('./db');
+var matchMaker = require('./matchmaker/matchmaker')();
 
 /*--------User Methods-----------*/
 exports.create = function (linkedInData, callback) {
@@ -45,7 +46,8 @@ exports.create = function (linkedInData, callback) {
         updatedObj[obj.relationships[i]] = obj.otherNodeData[i].data;
       }
       return updatedObj;
-    });    
+    });
+    matchMaker.classify(linkedInData.userId, function(){});
     callback(err, finalResults);
   });
 };
@@ -79,24 +81,19 @@ exports.get = function (data, callback) {
   });
 };
 
-exports.update = function (callback) {
-  this._node.save(function (err) {
-    callback(err);
-  });
+exports.update = function (data, callback) {
+  
 };
 
-exports.del = function (callback) {
+exports.del = function (data, callback) {
   // use a Cypher query to delete both this user and all of his relationships
   var query = [
-    'MATCH (user:User {userId})',
-    'DELETE user',
-    'WITH user',
-    'MATCH OPTIONAL (user) -[rel]- (other)',
-    'DELETE rel',
+    'MATCH (user:User {userId:{userId}})-[r]-()',
+    'DELETE user,r'
   ].join('\n');
 
   var params = {
-    userId: this.id
+    userId: data.userId
   };
 
   db.query(query, params, function (err) {
