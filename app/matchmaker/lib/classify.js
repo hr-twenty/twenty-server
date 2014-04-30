@@ -4,7 +4,7 @@ var match = function(db, userId, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_SKILL]->(:Skill)',
     '<-[:HAS_SKILL]-(peer:User)-[:BELONGS_TO]->(cluster:Cluster)',
-    'RETURN id(cluster)as clusterId, count(peer) ORDER BY count(peer) DESC'
+    'RETURN id(cluster) as clusterId, count(peer) ORDER BY count(peer) DESC'
   ].join(' \n');
 
   var params = {
