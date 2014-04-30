@@ -16,7 +16,7 @@ module.exports = function(db){
       'AND NOT (user)-[:HAS_STACK]->(:Stack)-[:APRROVED]->(other2)',
       'AND NOT (user)-[:HAS_STACK]->(:Stack)-[:REJECTED]->(other2)',
       'RETURN DISTINCT other2.userId as userId'
-    ].join(' ');
+    ].join('\n');
 
     var params = {
       userId: userId
@@ -30,7 +30,7 @@ module.exports = function(db){
         'WHERE user.userId <> other.userId',
         'AND NOT (us)-->(other)',
         'RETURN DISTINCT other.userId as userId LIMIT 30'
-      ].join(' ');
+      ].join('\n');
 
       var params = {
         userId: userId

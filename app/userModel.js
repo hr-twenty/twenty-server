@@ -90,6 +90,8 @@ exports.del = function (data, callback) {
   var query = [
     'MATCH (user:User {userId:{userId}})-[r]-()',
     'DELETE user,r'
+
+    ////////DELETE USER STACK
   ].join('\n');
 
   var params = {

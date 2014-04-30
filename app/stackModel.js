@@ -25,6 +25,14 @@ exports.getStack = function (data, callback) {
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
+
+    //if there aren't enough users on the stack, get more users
+    if(results.length < 10){
+      clusterStack(data, callback);
+    } else {
+      callback(null, finalResults);
+    }
+
     var finalResults = results.map(function(obj){
       var updatedObj = {};
       updatedObj.otherToUserRel = obj.otherToUserRel;
@@ -39,11 +47,8 @@ exports.getStack = function (data, callback) {
       return updatedObj;
     });
 
-    if(results.length < 10){
-      clusterStack(data);
-    }
 
-    callback(null, finalResults);
+
   });
 
 };
@@ -53,7 +58,7 @@ var clusterStack = function(data){
   matchMaker.matches(data.userId, function(err, results){
     if(results.length > 0){
       results.forEach(function(obj){
-        addOneUserToStack(data.userId, obj.otherId);
+        addOneUserToStack(data.userId, obj.userId);
       });
     } else {
       addAllUsersToStack(data);
@@ -62,18 +67,19 @@ var clusterStack = function(data){
 };
 
 //Add more users to this user's Stack if cluster isn't big enough
-var addAllUsersToStack = function(data){
+var addOneUserToStack = function(userId, otherId){
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
-    'WHERE user.userId <> other.userId',
-    'AND NOT (us)-->(other)',
-    'MERGE (us)-[:STACK_USER]-(other)',
-    'MERGE (os)-[:STACK_USER]-(user)',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User {userId:{otherId}})-[:HAS_STACK]->(os:Stack)',
+    'WITH user, us, other, os',
+    'LIMIT 10',
+    'MERGE (us)-[:STACK_USER]->(other)',
+    'MERGE (os)-[:STACK_USER]->(user)',
     'RETURN null'
   ].join('\n');
 
   var params = {
-    userId: data.userId
+    userId: userId,
+    otherId: otherId
   };
 
   db.query(query, params, function (err) {
@@ -81,17 +87,20 @@ var addAllUsersToStack = function(data){
   });
 };
 
-var addOneUserToStack = function(data){
+var addAllUsersToStack = function(data){
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User {userId:{otherId}})-[:HAS_STACK]->(os:Stack)',
-    'MERGE (us)-[:STACK_USER]->(other)',
-    'MERGE (os)-[:STACK_USER]->(user)',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
+    'WHERE user.userId <> other.userId',
+    'AND NOT (us)-->(other)',
+    'WITH user, us, other, os',
+    'LIMIT 10',
+    'MERGE (us)-[:STACK_USER]-(other)',
+    'MERGE (os)-[:STACK_USER]-(user)',
     'RETURN null'
   ].join('\n');
 
   var params = {
-    userId: data.userId,
-    otherId: data.otherId
+    userId: data.userId
   };
 
   db.query(query, params, function (err) {
