@@ -5,7 +5,7 @@ module.exports = function(db){
       //users in my own cluster
       'MATCH (user:User {userId:{userId}})-[:BELONGS_TO]->(source:Cluster)<-[:BELONGS_TO]-(other:User)',
       'WHERE (user)-[:LIVES_IN]->(:Location)<-[:LIVES_IN]-(other)',
-      'RETURN DISTINCT other.userId as userId',
+      'RETURN DISTINCT collect(other.userId) as otherId',
       'UNION',
       //users in my cluster-mates's preferred cluster
       'MATCH (user:User {userId:{userId}})-[:BELONGS_TO]->(source:Cluster)<-[:BELONGS_TO]-(peer:User),',
@@ -15,7 +15,8 @@ module.exports = function(db){
       'WHERE (user)-[:LIVES_IN]->(:Location)<-[:LIVES_IN]-(other2)',
       'AND NOT (user)-[:HAS_STACK]->(:Stack)-[:APRROVED]->(other2)',
       'AND NOT (user)-[:HAS_STACK]->(:Stack)-[:REJECTED]->(other2)',
-      'RETURN DISTINCT other2.userId as userId'
+      'RETURN DISTINCT collect(other2.userId) as otherId',
+      'LIMIT 30'
     ].join('\n');
 
     var params = {
@@ -29,7 +30,8 @@ module.exports = function(db){
         'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
         'WHERE user.userId <> other.userId',
         'AND NOT (us)-->(other)',
-        'RETURN DISTINCT other.userId as userId LIMIT 30'
+        'RETURN DISTINCT collect(other.userId) as otherId',
+        'LIMIT 10'
       ].join('\n');
 
       var params = {
@@ -38,7 +40,8 @@ module.exports = function(db){
 
       db.query(query, params, function(err, randomResults){
         if (err) return callback(err);
-        callback(null, results.concat(randomResults));
+        var finalResults = results[0].otherId.concat(results[1].otherId).concat(randomResults[0].otherId);
+        callback(null, finalResults);
       });
     });
   };
