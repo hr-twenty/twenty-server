@@ -41,7 +41,8 @@ module.exports = function(app, passport) {
   app.get('/auth/linkedin/callback',
     passport.authenticate('linkedin', { failureRedirect: '/login' }),
     function(req, res) {
-      res.redirect('/#/main/home/?userId=' + req.user.id);
+      // TODO: don't hardcode address
+      res.redirect('http://localhost:3000/#/loading?userId=' + req.user.id);
     }
   );
 

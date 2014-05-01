@@ -38,6 +38,7 @@ module.exports = function(app, passport, ip, port) {
     ]
   }, function(req, accessToken, refreshToken, profile, done) {
 
+    console.log(profile._raw);
     var user = {
       id: 'nil',
       firstName: 'nil',
@@ -128,7 +129,8 @@ module.exports = function(app, passport, ip, port) {
         });
       } else {
         // TODO: update user
-        console.log('User updated...');
+        console.log('User found...');
+        console.log(err || finalResults);
       }
     });
 
