@@ -58,7 +58,6 @@ var addAllMatchesToStack = function(userId, array, callback){
     'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData'
   ].join('\n');
 
-console.log(query);
   var params = {
     userId: userId
   };

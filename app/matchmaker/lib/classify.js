@@ -48,7 +48,6 @@ var createRelation = function(db, userId, clusterId, callback){
 module.exports = function(db){
   return function(userId, callback){
     match(db, userId, function(err, results){
-      console.log(err)
       if (results.length === 0){
         createCluster(db, userId, callback);
       } else {
