@@ -47,52 +47,13 @@ module.exports = function(app, passport, ip, port) {
       headline: 'Not Entered',
       pictureUrl: 'Not Entered',
       numConnections: 'Not Entered',
-      industry: 'Not Entered',
-      location: {
-        name: 'Not Entered',
-        country: {
-          code: 'Not Entered'
-        }
-      },
-      positions: {
-        values: [{
-          title: 'Not Entered',
-          company: {
-            name: 'Not Entered',
-            size: 'Not Entered'
-          },
-          startDate: {
-            month: 'Not Entered',
-            year: 'Not Entered'
-          },
-          isCurrent: 'Not Entered'
-        }]
-      },
-      skills: {
-        values: [{
-          skill: { name: 'Not Entered' }
-        }]
-      },
-      educations: {
-        values: [{
-          schoolName: 'Not Entered',
-          fieldOfStudy: 'Not Entered',
-          startDate: { year: 'Not Entered' },
-          endDate: { year: 'Not Entered' }
-        }]
-      },
-      languages: {
-        values: [{
-          language: { name: 'Not Entered' }
-        }]
-      }
+      industry: 'Not Entered'
     };
 
     _.merge(user, JSON.parse(profile._raw));
 
     User.get({ userId: profile.id }, function(err, finalResults) {
       if (finalResults.length === 0) {
-        console.log(user.languages.values[0]);
         User.create(user, function(err) {
           console.log('User created...');
           console.log('err',err);
