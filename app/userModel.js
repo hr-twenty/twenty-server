@@ -42,32 +42,19 @@ exports.create = function (linkedInData, callback) {
   };
 
   db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-    var finalResults = results.map(function(obj){
-      var updatedObj = {};
-      //get user data
-      for(var key in obj.user.data){
-        updatedObj[key] = obj.user.data[key];
-      }
-      //get all relationships
-      for(var i = 0; i < obj.relationships.length; i++){
-        if(updatedObj[obj.relationships[i]]){
-          updatedObj[obj.relationships[i]].push(obj.otherNodeData[i].data);
-        } else {
-          updatedObj[obj.relationships[i]] = [obj.otherNodeData[i].data];
-        }
-      }
-      return updatedObj;
-    });
-    // matchMaker.classify(linkedInData.userId, function(){});
-    callback(err, finalResults);
+    if (err){return callback(err);}
+    else {
+      processResults(results, callback);
+      // matchMaker.classify(linkedInData.userId, function(){});
+    }
   });
 };
 
 exports.get = function (data, callback) {
   var query = [
     'MATCH (user:User {userId:{userId}})-[rel]->(other)',
-    'WHERE type(rel) <> "HAS_STACK" AND type(rel) <> "HAS_CONVERSATION"',
+    'WHERE type(rel) <> "HAS_STACK"',
+    'AND type(rel) <> "HAS_CONVERSATION"',
     'RETURN user, collect(type(rel)) as relationships, collect(other) as otherNodeData'
   ].join('\n');
 
@@ -76,20 +63,8 @@ exports.get = function (data, callback) {
   };
 
   db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-    var finalResults = results.map(function(obj){
-      var updatedObj = {};
-      //get user data
-      for(var key in obj.user.data){
-        updatedObj[key] = obj.user.data[key];
-      }
-      //get all relationships
-      for(var i = 0; i < obj.relationships.length; i++){
-        updatedObj[obj.relationships[i]] = obj.otherNodeData[i].data;
-      }
-      return updatedObj;
-    });
-    callback(err, finalResults);
+    if (err){return callback(err);}
+    else {processResults(results, callback);}
   });
 };
 
@@ -101,9 +76,8 @@ exports.del = function (data, callback) {
   // use a Cypher query to delete both this user and all of his relationships
   var query = [
     'MATCH (user:User {userId:{userId}})-[r]-()',
-    'DELETE user,r'
-
-    ////////DELETE USER STACK
+    'OPTIONAL MATCH (user)-[:HAS_STACK]->(stack:Stack)',
+    'DELETE user,r, stack'
   ].join('\n');
 
   var params = {
@@ -113,6 +87,28 @@ exports.del = function (data, callback) {
   db.query(query, params, function (err) {
     callback(err);
   });
+};
+
+//Clean up the data from Neo4j before sending to the front end
+var processResults = function(results, callback){
+  var finalResults = results.map(function(obj){
+    var updatedObj = {};
+    updatedObj.otherToUserRel = obj.otherToUserRel || 'STACK_USER';
+    //get user data and put it directly on the object
+    for(var key in obj.other.data){
+      updatedObj[key] = obj.other.data[key];
+    }
+    //for each relationship, create a key of the relationship type and a value of that relationship's data
+    for(var i = 0; i < obj.relationships.length; i++){
+      if(updatedObj[obj.relationships[i]]){
+        updatedObj[obj.relationships[i]].push(obj.otherNodeData[i].data);
+      } else {
+        updatedObj[obj.relationships[i]] = [obj.otherNodeData[i].data];
+      }
+    }
+    return updatedObj;
+  });
+  callback(null, finalResults);
 };
 
 /*--------Query Helper Methods-----------*/

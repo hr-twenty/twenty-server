@@ -45,11 +45,14 @@ var clusterStack = function(data, callback){
   });
 };
 
+//Add the user to each other user in the array and vice versa 
 var addAllMatchesToStack = function(userId, array, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
     'WHERE other.userId IN {results}',
-    'WITH user, us, other, os',
+    'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
+    'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
+    'WITH other, os',
     'LIMIT 40',
     'MATCH (other)-[r3]->(otherInfo)',
     'WHERE type(r3) <> "HAS_CONVERSATION"',
@@ -57,8 +60,6 @@ var addAllMatchesToStack = function(userId, array, callback){
     'AND type(r3) <> "STACK_USER"',
     'AND type(r3) <> "APPROVED"',
     'AND type(r3) <> "REJECTED"',
-    'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
-    'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
     'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData'
   ].join('\n');
 
@@ -84,7 +85,11 @@ var processResults = function(results, callback){
     }
     //for each relationship, create a key of the relationship type and a value of that relationship's data
     for(var i = 0; i < obj.relationships.length; i++){
-      updatedObj[obj.relationships[i]] = obj.otherNodeData[i].data;
+      if(updatedObj[obj.relationships[i]]){
+        updatedObj[obj.relationships[i]].push(obj.otherNodeData[i].data);
+      } else {
+        updatedObj[obj.relationships[i]] = [obj.otherNodeData[i].data];
+      }
     }
     return updatedObj;
   });
@@ -95,10 +100,10 @@ var processResults = function(results, callback){
 exports.approve = function (data, callback) {
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1:STACK_USER]->(other:User {userId:{otherId}})',
-    'OPTIONAL MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     'DELETE r1',
-    'WITH r2, us, other',
+    'WITH us, other',
     'MERGE (us)-[r3:APPROVED]->(other)',
+    'OPTIONAL MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     'RETURN type(r2) as otherToUserRel'
   ].join('\n');
 
