@@ -5,7 +5,7 @@ var db = require('./db');
 exports.getAllConversations = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})',
-    'SET user.lastActive = '+ new Date().getTime(),
+    'SET user.lastActive = "'+ new Date().getTime()+'"',
     'WITH user',
     'MATCH (user)--(c:Conversation)--(other:User),',
     '(other)-[:WORKS_FOR]->(company:Company)',
