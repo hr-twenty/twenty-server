@@ -51,14 +51,15 @@ module.exports = function(app, passport, ip, port) {
     _.merge(user, JSON.parse(profile._raw));
 
     User.get({ userId: profile.id }, function(err, finalResults) {
+      if (err) throw err;
       if (finalResults.length === 0) {
         User.create(user, function(err) {
+          if (err) throw err;
           console.log('User created...');
-          console.log('err',err);
         });
       } else {
         // TODO: update user
-        console.log('User updated...');
+        console.log('User found...');
       }
     });
 
