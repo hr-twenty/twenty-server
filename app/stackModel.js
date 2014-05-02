@@ -28,21 +28,16 @@ exports.getStack = function (data, callback) {
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
 
-    //if there aren't enough users on the stack, get more users
-    // if(results.length < 10){
-    //   clusterStack(data, callback);
-    // } else {
+    
+    //if there aren't enough users on the stack, get more users from the cluster
+    if(results.length < 10){
+      matchMaker.matches(data.userId, function(err, results){
+        addAllMatchesToStack(data.userId, results, callback);
+      });
+    } else {
     //otherwise, clean up the data and send it out
       processResults(results, callback);
-    // }
-  });
-
-};
-
-//Add more users to this user's Stack based on cluster
-var clusterStack = function(data, callback){
-  matchMaker.matches(data.userId, function(err, results){
-    addAllMatchesToStack(data.userId, results, callback);
+    }
   });
 };
 

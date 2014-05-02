@@ -75,7 +75,7 @@ exports.update = function (data, callback) {
   // var userId = data.userId;
   // var query = 'MATCH (user:User {userId:"'+userId+'"}) '+
   //   'WITH user ';
-  //
+
   // //remove/delete the previous values
   // for(var key in data.previous){
   //   if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key) !== -1){
@@ -89,7 +89,7 @@ exports.update = function (data, callback) {
   //     });
   //   }
   // }
-  //
+
   // //update/create the new values
   // for(var key3 in data.current){
   //   if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key3) !== -1){
@@ -103,7 +103,7 @@ exports.update = function (data, callback) {
   //     }
   //   }
   // }
-  //
+
   // db.query(query, null, function (err) {
   //   callback(err);
   // });
@@ -168,7 +168,7 @@ var positionQuery = function(user){
       'CREATE UNIQUE (user)-[:'+isCurrentPos(p)+']->(position) '+
       'WITH user '+
       'MERGE (company:Company {name:"'+p.company.name+'"}) '+
-      'MERGE (companySize:CompanySize {size:"'+p.company.size+'"}) '+
+      'MERGE (companySize:CompanySize {size:"'+(p.company.size || 'Not Entered')+'"}) '+
       'CREATE UNIQUE (company) -[:HAS_CO_SIZE]-> (companySize) '+
       'CREATE UNIQUE (user) -[:'+isCurrentCo(p)+' {startDate:"'+p.startDate.month+'-'+p.startDate.year+'", endDate:"'+isCurrentDate(p)+'"}]-> (company) '+
       'WITH user ';
