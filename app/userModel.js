@@ -69,7 +69,31 @@ exports.get = function (data, callback) {
 };
 
 exports.update = function (data, callback) {
-  
+  var userId = data.userId;
+  delete data.userId;
+  finalResult = '';
+  for(var key in data){
+    if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key) !== -1){
+
+    } else {
+
+    }
+  };
+
+  user.positions.values.forEach(function(p){
+    finalResult += 'MERGE (position:Position {title:"'+p.title+'"}) '+
+    'CREATE UNIQUE (user)-[:'+isCurrentPos(p)+']->(position) '+
+    'WITH user '+
+    'MERGE (company:Company {name:"'+p.company.name+'"}) '+
+    'MERGE (companySize:CompanySize {size:"'+p.company.size+'"}) '+
+    'CREATE UNIQUE (company) -[:HAS_CO_SIZE]-> (companySize) '+
+    'CREATE UNIQUE (user) -[:'+isCurrentCo(p)+' {startDate:"'+p.startDate.month+'-'+p.startDate.year+'", endDate:"'+isCurrentDate(p)+'"}]-> (company) '+
+    'WITH user ';
+  });
+
+  db.query(query, params, function (err) {
+    callback(err);
+  });
 };
 
 exports.del = function (data, callback) {
@@ -93,7 +117,6 @@ exports.del = function (data, callback) {
 var processResults = function(results, callback){
   var finalResults = results.map(function(obj){
     var updatedObj = {};
-    updatedObj.otherToUserRel = obj.otherToUserRel || 'STACK_USER';
     //get user data and put it directly on the object
     for(var key in obj.user.data){
       updatedObj[key] = obj.user.data[key];
@@ -146,8 +169,8 @@ var languageQuery = function(user){
     var finalResult = '';
     user.languages.values.forEach(function(l){
       finalResult += 'MERGE (language:Language {name:"'+l.language.name+'"}) '+
-    'CREATE UNIQUE (user) -[:SPEAKS]-> (language) '+
-    'WITH user ';
+      'CREATE UNIQUE (user) -[:SPEAKS]-> (language) '+
+      'WITH user ';
     });
     return finalResult;
   }
@@ -158,19 +181,27 @@ var skillQuery = function(user){
     var finalResult = '';
     user.skills.values.forEach(function(s){
       finalResult += 'MERGE (skill:Skill {skill:"'+s.skill.name+'"}) '+
-    'CREATE UNIQUE (user) -[:HAS_SKILL]-> (skill) '+
-    'WITH user ';
+      'CREATE UNIQUE (user) -[:HAS_SKILL]-> (skill) '+
+      'WITH user ';
     });
     return finalResult;
   }
 };
 
 var schoolQuery = function(user){
+  var startYearOrNA = function(s){
+    if(s.startDate){return s.startDate.year;}
+    else {return 'Not Entered';}
+  };
+  var endYearOrNA = function(s){
+    if(s.endDate){return s.endDate.year;}
+    else {return 'Not Entered';}
+  };
   if(user.educations){
     var finalResult = '';
     user.educations.values.forEach(function(s){
       finalResult += 'MERGE (school:School {name:"'+s.schoolName+'"}) '+
-      'CREATE UNIQUE (user) -[:ATTENDED {fieldOfStudy:"'+(s.fieldOfStudy || '')+'", startDate:"'+(s.startDate.year || '')+'",endDate:"'+(s.endDate.year || '')+'"}]-> (school) '+
+      'CREATE UNIQUE (user) -[:ATTENDED {fieldOfStudy:"'+(s.fieldOfStudy || '')+'", startDate:"'+startYearOrNA(s)+'",endDate:"'+endYearOrNA(s)+'"}]-> (school) '+
       'WITH user ';
     });
     return finalResult;
