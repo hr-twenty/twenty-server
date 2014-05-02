@@ -50,8 +50,11 @@ module.exports = function(db){
   return function(userId, callback){
     match(db, userId, function(err, results){
       if (results.length === 0){
+        console.log('create', results)
         createCluster(db, userId, callback);
       } else {
+        console.log('rel', results)
+
         createRelation(db, userId, results[0]['clusterId'], callback);
       }
     });
