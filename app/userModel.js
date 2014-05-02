@@ -72,41 +72,41 @@ exports.get = function (data, callback) {
 //template for update data
 //var data = {userId:'3', previous:[{"WORKS_AT":{name:'Twitter'}}], current:[{"WORKED_AT":{name:'Twitter'},{"WORKS_AT":{name:'Google'}}]
 exports.update = function (data, callback) {
-  var userId = data.userId;
-  var query = 'MATCH (user:User {userId:"'+userId+'"}) '+
-    'WITH user ';
-
-  //remove/delete the previous values
-  for(var key in data.previous){
-    if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key) !== -1){
-      query += 'REMOVE user.'+key+' '+
-        'WITH user ';
-    } else {
-      for(var key2 in data.previous.key){
-        query += 'MATCH (user)-[r'+key+']->(other {'+key2+':'+data.previous[key][key2]+'}) '+
-          'DELETE r '+
-          'WITH user ';
-      });
-    }
-  }
-
-  //update/create the new values
-  for(var key3 in data.current){
-    if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key3) !== -1){
-      query += 'SET user.'+key3+' = '+data.current.key3+' '+
-        'WITH user ';
-    } else {
-      for(var key4 in data.current.key3){
-        query += 'MATCH (other {'+key4+':'+data.current[key4]+'}) '+
-          'CREATE UNIQUE (user)-[:'+key3+']->(other) '+
-          'WITH user ';
-      }
-    }
-  }
-
-  db.query(query, null, function (err) {
-    callback(err);
-  });
+  // var userId = data.userId;
+  // var query = 'MATCH (user:User {userId:"'+userId+'"}) '+
+  //   'WITH user ';
+  //
+  // //remove/delete the previous values
+  // for(var key in data.previous){
+  //   if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key) !== -1){
+  //     query += 'REMOVE user.'+key+' '+
+  //       'WITH user ';
+  //   } else {
+  //     for(var key2 in data.previous.key){
+  //       query += 'MATCH (user)-[r'+key+']->(other {'+key2+':'+data.previous[key][key2]+'}) '+
+  //         'DELETE r '+
+  //         'WITH user ';
+  //     });
+  //   }
+  // }
+  //
+  // //update/create the new values
+  // for(var key3 in data.current){
+  //   if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key3) !== -1){
+  //     query += 'SET user.'+key3+' = '+data.current.key3+' '+
+  //       'WITH user ';
+  //   } else {
+  //     for(var key4 in data.current.key3){
+  //       query += 'MATCH (other {'+key4+':'+data.current[key4]+'}) '+
+  //         'CREATE UNIQUE (user)-[:'+key3+']->(other) '+
+  //         'WITH user ';
+  //     }
+  //   }
+  // }
+  //
+  // db.query(query, null, function (err) {
+  //   callback(err);
+  // });
 };
 
 exports.del = function (data, callback) {

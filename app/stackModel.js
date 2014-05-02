@@ -34,7 +34,7 @@ exports.getStack = function (data, callback) {
     // } else {
     //otherwise, clean up the data and send it out
       processResults(results, callback);
-    }
+    // }
   });
 
 };
