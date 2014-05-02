@@ -40,8 +40,15 @@ module.exports = function(db){
 
       db.query(query, params, function(err, randomResults){
         if (err) return callback(err);
-        var finalResults = results[0].otherId.concat(results[1].otherId).concat(randomResults[0].otherId);
-        callback(null, finalResults);
+        var checkResults = function(){
+          if(results[0] && results[1]){
+            return results[0].otherId.concat(results[1].otherId).concat(randomResults[0].otherId);
+          } else {
+            return randomResults;
+          }
+        };
+        var finalResults = checkResults();
+        callback(err, finalResults);
       });
     });
   };

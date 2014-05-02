@@ -4,12 +4,14 @@ var db = require('./db');
 /*--------Conversation Methods-----------*/
 exports.getAllConversations = function(data, callback){
   var query = [
-    'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User),',
+    'MATCH (user:User {userId:{userId}})',
+    'SET user.lastActive = '+ new Date().getTime(),
+    'WITH user',
+    'MATCH (user)--(c:Conversation)--(other:User),',
     '(other)-[:WORKS_FOR]->(company:Company)',
     'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-    'WITH other, m, c, company',
-    'ORDER BY m.time',
     'RETURN other, collect(m) as messages, c.connectDate as connectDate, company',
+    'ORDER BY m.time'
   ].join('\n');
 
   var params = {
@@ -27,9 +29,8 @@ exports.getOneConversation = function(data, callback){
     'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}})',
     'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
     'WHERE m.time > {mostRecentMsg}',
-    'WITH other, m, c',
-    'ORDER BY m.time',
-    'RETURN other, c.connectDate as connectDate, collect(m) as messages'
+    'RETURN other, c.connectDate as connectDate, collect(m) as messages',
+    'ORDER BY m.time'
   ].join('\n');
 
   var params = {
@@ -53,6 +54,7 @@ var processMessages = function(userId, results, callback){
       firstName: obj.other.data.firstName,
       lastName: obj.other.data.lastName,
       picture: obj.other.data.picture,
+      lastActive: obj.other.data.lastActive,
       company: obj.company.data.name
     };
     obj.connectDate = obj.connectDate;

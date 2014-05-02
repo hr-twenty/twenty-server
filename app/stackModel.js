@@ -28,21 +28,16 @@ exports.getStack = function (data, callback) {
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
 
-    //if there aren't enough users on the stack, get more users
-    // if(results.length < 10){
-    //   clusterStack(data, callback);
-    // } else {
+    
+    //if there aren't enough users on the stack, get more users from the cluster
+    if(results.length < 10){
+      matchMaker.matches(data.userId, function(err, results){
+        addAllMatchesToStack(data.userId, results, callback);
+      });
+    } else {
     //otherwise, clean up the data and send it out
       processResults(results, callback);
-    // }
-  });
-
-};
-
-//Add more users to this user's Stack based on cluster
-var clusterStack = function(data, callback){
-  matchMaker.matches(data.userId, function(err, results){
-    addAllMatchesToStack(data.userId, results, callback);
+    }
   });
 };
 
@@ -50,10 +45,10 @@ var clusterStack = function(data, callback){
 var addAllMatchesToStack = function(userId, array, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
-    'WHERE other.userId IN {results}',
+    'WHERE other.userId IN '+array,
     'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
     'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
-    'WITH other, os',
+    'WITH other',
     'LIMIT 40',
     'MATCH (other)-[r3]->(otherInfo)',
     'WHERE type(r3) <> "HAS_CONVERSATION"',
@@ -64,9 +59,9 @@ var addAllMatchesToStack = function(userId, array, callback){
     'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData'
   ].join('\n');
 
+console.log(query);
   var params = {
-    userId: userId,
-    results: array
+    userId: userId
   };
 
   db.query(query, params, function (err, results) {
