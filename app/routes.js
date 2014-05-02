@@ -5,21 +5,21 @@ var userHandlers = require('./userHandlers'),
 
 module.exports = function(app, passport) {
 
-  app.use('/user', passport.authorize('linkedin', { failureRedirect: '/login' }))
+  // app.use('/user', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.get('/user', userHandlers.getUserData);
   app.post('/user', userHandlers.createNewUser);
   app.put('/user', userHandlers.updateUser);
   app.del('/user', userHandlers.deleteUser);
 
   //UserStack
-  app.use('/userStack', passport.authorize('linkedin', { failureRedirect: '/login' }))
+  // app.use('/userStack', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.post('/userStack/approve', stackHandlers.approve);
   app.post('/userStack/reject', stackHandlers.reject);
   app.post('/userStack/reset', stackHandlers.resetStack);
   app.get('/userStack', stackHandlers.getStack);
 
   //Messages
-  app.use('/conversations', passport.authorize('linkedin', { failureRedirect: '/login' }))
+  // app.use('/conversations', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.get('/conversations/all', messageHandlers.getAllConversations);
   app.get('/conversations/one', messageHandlers.getOneConversation);
   app.post('/conversations/one', messageHandlers.sendMessage);
