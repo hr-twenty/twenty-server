@@ -10,6 +10,7 @@ exports.getStack = function (data, callback) {
     'WHERE type(r2) <> "REJECTED"',
     'AND user.userId <> other.userId',
     'WITH other, r2',
+    // 'SKIP '+(data.skip || 0),
     'LIMIT 20',
     'MATCH (other)-[r3]->(otherInfo)',
     'WHERE type(r3) <> "HAS_CONVERSATION"',
@@ -28,9 +29,9 @@ exports.getStack = function (data, callback) {
     if (err) return callback(err);
 
     //if there aren't enough users on the stack, get more users
-    if(results.length < 10){
-      clusterStack(data, callback);
-    } else {
+    // if(results.length < 10){
+    //   clusterStack(data, callback);
+    // } else {
     //otherwise, clean up the data and send it out
       processResults(results, callback);
     }
