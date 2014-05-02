@@ -15,6 +15,7 @@ module.exports = function(app, passport) {
   app.use('/userStack', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.post('/userStack/approve', stackHandlers.approve);
   app.post('/userStack/reject', stackHandlers.reject);
+  app.post('/userStack/reset', stackHandlers.resetStack);
   app.get('/userStack', stackHandlers.getStack);
 
   //Messages

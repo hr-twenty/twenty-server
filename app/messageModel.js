@@ -17,28 +17,8 @@ exports.getAllConversations = function(data, callback){
   };
 
   db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-    var finalResults = results.map(function(obj){
-      obj.user = params.userId;
-      obj.other = {
-        userId: obj.other.data.userId,
-        firstName: obj.other.data.firstName,
-        lastName: obj.other.data.lastName,
-        picture: obj.other.data.picture,
-        company: obj.company.data.name
-      };
-      obj.connectDate = obj.connectDate;
-      obj.messages = obj.messages.map(function(obj2){
-        return {
-          sender:obj2.data.sender,
-          text:obj2.data.text,
-          time:obj2.data.time
-        };
-      });
-      delete obj.company;
-      return obj;
-    });
-    callback(err, finalResults);
+    if (err){return callback(err);}
+    else {processMessages(data.userId, results, callback);}
   });
 };
 
@@ -59,27 +39,34 @@ exports.getOneConversation = function(data, callback){
   };
 
   db.query(query, params, function (err, results) {
-    if (err) return callback(err);
-    var finalResults = results.map(function(obj){
-      obj.user = params.userId;
-      obj.other = {
-        userId: obj.other.data.userId,
-        firstName: obj.other.data.firstName,
-        lastName: obj.other.data.lastName,
-        picture: obj.other.data.picture
-      };
-      obj.connectDate = obj.connectDate;
-      obj.messages = obj.messages.map(function(obj2){
-        return {
-          sender:obj2.data.sender,
-          text:obj2.data.text,
-          time:obj2.data.time
-        };
-      });
-      return obj;
-    });
-    callback(err, finalResults);
+    if (err){return callback(err);}
+    else {processMessages(data.userId, results, callback);}
   });
+};
+
+//Clean up the data from Neo4j before sending to the front end
+var processMessages = function(userId, results, callback){
+  var finalResults = results.map(function(obj){
+    obj.user = userId;
+    obj.other = {
+      userId: obj.other.data.userId,
+      firstName: obj.other.data.firstName,
+      lastName: obj.other.data.lastName,
+      picture: obj.other.data.picture,
+      company: obj.company.data.name
+    };
+    obj.connectDate = obj.connectDate;
+    obj.messages = obj.messages.map(function(obj2){
+      return {
+        sender:obj2.data.sender,
+        text:obj2.data.text,
+        time:obj2.data.time
+      };
+    });
+    delete obj.company;
+    return obj;
+  });
+  callback(null, finalResults);
 };
 
 exports.sendMessage = function(data, callback){

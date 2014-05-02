@@ -25,3 +25,8 @@ exports.reject = function(req, res){
   var stackData = req.body;
   Stack.reject(stackData, generalResponse(res));
 };
+
+exports.resetStack = function(req, res){
+  var stackData = req.body;
+  Stack.resetStack(stackData, generalResponse(res));
+};
