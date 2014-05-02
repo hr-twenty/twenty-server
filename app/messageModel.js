@@ -10,7 +10,7 @@ exports.getAllConversations = function(data, callback){
     'MATCH (user)--(c:Conversation)--(other:User),',
     '(other)-[:WORKS_FOR]->(company:Company)',
     'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-    'RETURN other, collect(m) as messages, c.connectDate as connectDate, company'
+    'RETURN other, collect(m) as messages, c.connectDate as connectDate, company',
   ].join('\n');
 
   var params = {
@@ -29,7 +29,6 @@ exports.getOneConversation = function(data, callback){
     'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
     'WHERE m.time > {mostRecentMsg}',
     'RETURN other, c.connectDate as connectDate, collect(m) as messages',
-    'ORDER BY m.time'
   ].join('\n');
 
   var params = {
