@@ -5,10 +5,8 @@ var matchMaker = require('./matchmaker/matchmaker')();
 /*--------Stack Methods-----------*/
 exports.getStack = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]',
-    '->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     'WHERE type(r2) <> "REJECTED"',
-    'AND user.userId <> other.userId',
     'WITH other, r2',
     'LIMIT 20',
     'MATCH (other)-[r3]->(otherInfo)',
@@ -16,6 +14,7 @@ exports.getStack = function (data, callback) {
     'AND type(r3) <> "HAS_STACK"',
     'AND type(r3) <> "STACK_USER"',
     'AND type(r3) <> "APPROVED"',
+    'AND type(r3) <> "REJECTED"',
     'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData, type(r2) as otherToUserRel',
     'ORDER BY type(r2)'
   ].join('\n');
@@ -97,7 +96,7 @@ exports.approve = function (data, callback) {
     'DELETE r1',
     'WITH us, other, user',
     'MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
-    'MERGE (us)-[r3:APPROVED]->(other)',
+    'CREATE UNIQUE (us)-[:APPROVED]->(other)',
     'RETURN type(r2) as otherToUserRel'
   ].join('\n');
 
@@ -138,7 +137,7 @@ exports.reject = function (data, callback) {
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User {userId:{otherId}})',
     'DELETE r1',
     'WITH us, other',
-    'MERGE (us)-[:REJECTED]->(other)',
+    'CREATE UNIQUE (us)-[:REJECTED]->(other)',
     'RETURN null'
   ].join('\n');
 
