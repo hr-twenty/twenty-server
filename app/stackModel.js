@@ -10,7 +10,6 @@ exports.getStack = function (data, callback) {
     'WHERE type(r2) <> "REJECTED"',
     'AND user.userId <> other.userId',
     'WITH other, r2',
-    // 'SKIP '+(data.skip || 0),
     'LIMIT 20',
     'MATCH (other)-[r3]->(otherInfo)',
     'WHERE type(r3) <> "HAS_CONVERSATION"',
@@ -45,7 +44,7 @@ exports.getStack = function (data, callback) {
 var addAllMatchesToStack = function(userId, array, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
-    'WHERE other.userId IN '+array,
+    'WHERE other.userId IN ["'+array.join('","')+'"]',
     'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
     'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
     'WITH other',
