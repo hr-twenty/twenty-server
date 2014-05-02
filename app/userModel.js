@@ -8,7 +8,7 @@ exports.create = function (linkedInData, callback) {
     'MERGE (user:User {userId:{userId}, firstName:{firstName}, lastName:{lastName}, headline: {headline}, picture: {picture}, numConnections: {numConnections}})',
     'CREATE UNIQUE (user) -[:HAS_STACK]-> (:Stack)',
     'WITH user',
-    'SET user.lastActive = '+ new Date().getTime(),
+    'SET user.lastActive = "'+new Date().getTime()+'"',
     'WITH user',
     'MERGE (location:Location {city:{locationCity}, country:{locationCountry}})',
     'CREATE UNIQUE (user) -[:LIVES_IN]-> (location)',
