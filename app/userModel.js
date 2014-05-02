@@ -68,30 +68,43 @@ exports.get = function (data, callback) {
   });
 };
 
+
+//template for update data
+//var data = {userId:'3', previous:[{"WORKS_AT":{name:'Twitter'}}], current:[{"WORKED_AT":{name:'Twitter'},{"WORKS_AT":{name:'Google'}}]
 exports.update = function (data, callback) {
   var userId = data.userId;
-  delete data.userId;
-  finalResult = '';
-  for(var key in data){
-    if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key) !== -1){
-
-    } else {
-
-    }
-  };
-
-  user.positions.values.forEach(function(p){
-    finalResult += 'MERGE (position:Position {title:"'+p.title+'"}) '+
-    'CREATE UNIQUE (user)-[:'+isCurrentPos(p)+']->(position) '+
-    'WITH user '+
-    'MERGE (company:Company {name:"'+p.company.name+'"}) '+
-    'MERGE (companySize:CompanySize {size:"'+p.company.size+'"}) '+
-    'CREATE UNIQUE (company) -[:HAS_CO_SIZE]-> (companySize) '+
-    'CREATE UNIQUE (user) -[:'+isCurrentCo(p)+' {startDate:"'+p.startDate.month+'-'+p.startDate.year+'", endDate:"'+isCurrentDate(p)+'"}]-> (company) '+
+  var query = 'MATCH (user:User {userId:"'+userId+'"}) '+
     'WITH user ';
-  });
 
-  db.query(query, params, function (err) {
+  //remove/delete the previous values
+  for(var key in data.previous){
+    if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key) !== -1){
+      query += 'REMOVE user.'+key+' '+
+        'WITH user ';
+    } else {
+      for(var key2 in data.previous.key){
+        query += 'MATCH (user)-[r'+key+']->(other {'+key2+':'+data.previous[key][key2]+'}) '+
+          'DELETE r '+
+          'WITH user ';
+      });
+    }
+  }
+
+  //update/create the new values
+  for(var key3 in data.current){
+    if(['firstName', 'lastName', 'headline', 'picture', 'numConnections'].indexOf(key3) !== -1){
+      query += 'SET user.'+key3+' = '+data.current.key3+' '+
+        'WITH user ';
+    } else {
+      for(var key4 in data.current.key3){
+        query += 'MATCH (other {'+key4+':'+data.current[key4]+'}) '+
+          'CREATE UNIQUE (user)-[:'+key3+']->(other) '+
+          'WITH user ';
+      }
+    }
+  }
+
+  db.query(query, null, function (err) {
     callback(err);
   });
 };
