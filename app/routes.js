@@ -42,13 +42,14 @@ module.exports = function(app, passport) {
     passport.authenticate('linkedin', { failureRedirect: '/login' }),
     function(req, res) {
       // TODO: don't hardcode address
+      // only works in testing on chrome; doesn't work on mobile devices
       res.redirect('http://localhost:3000/#/loading?userId=' + req.user.id);
     }
   );
 
   // Catch all route
   app.get('/*', function(req, res) {
-    console.log(' *** uncaught request', req.url);
+    console.log(' *** uncaught request at %s ***', req.url);
     res.send(404);
   });
 
