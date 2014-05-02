@@ -44,8 +44,10 @@ exports.create = function (linkedInData, callback) {
   db.query(query, params, function (err, results) {
     if (err){return callback(err);}
     else {
+      //send results back to the front end
       processResults(results, callback);
-      // matchMaker.classify(linkedInData.userId, function(){});
+      //add the user to the appropriate cluster
+      matchMaker.classify(linkedInData.userId, function(){});
     }
   });
 };
