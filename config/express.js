@@ -1,19 +1,23 @@
-var path = require('path');
-var morgan = require('morgan');
-var bodyParser = require('body-parser');
-var methodOverride = require('method-override');
+/* global require, module */
+var path = require('path'),
+    morgan = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
+    methodOverride = require('method-override'),
+    session = require('express-session');
 
-var express = require('express');
-var env = require('./env');
-console.log('envType', env.envType);
+module.exports = function(app, express, env) {
 
-module.exports = function(app) {
   app.set('port', env.port);
-  app.use(express.static(path.join(env.rootPath, 'public')));
 
   app.use(morgan('dev'));
 
   app.use(bodyParser());
   app.use(methodOverride());
-};
+  app.use(cookieParser());
+  app.use(session({ secret: 'my secret' }));
 
+  app.use(express.static(path.join(env.rootPath, 'public')));
+
+  app.use(require('./cors'));
+};
