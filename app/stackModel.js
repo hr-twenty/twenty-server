@@ -95,9 +95,9 @@ exports.approve = function (data, callback) {
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User {userId:{otherId}})',
     'DELETE r1',
-    'WITH us, other',
+    'WITH us, other, user',
+    'MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     'MERGE (us)-[r3:APPROVED]->(other)',
-    'OPTIONAL MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     'RETURN type(r2) as otherToUserRel'
   ].join('\n');
 
