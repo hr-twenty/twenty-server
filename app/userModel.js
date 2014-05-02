@@ -95,8 +95,8 @@ var processResults = function(results, callback){
     var updatedObj = {};
     updatedObj.otherToUserRel = obj.otherToUserRel || 'STACK_USER';
     //get user data and put it directly on the object
-    for(var key in obj.other.data){
-      updatedObj[key] = obj.other.data[key];
+    for(var key in obj.user.data){
+      updatedObj[key] = obj.user.data[key];
     }
     //for each relationship, create a key of the relationship type and a value of that relationship's data
     for(var i = 0; i < obj.relationships.length; i++){
