@@ -18,7 +18,6 @@ exports.createNewUser = function(req, res){
 };
 
 exports.getUserData = function(req, res){
-  console.log('getUserData', req);
   var userData = req.query;
   User.get(userData, generalResponse(res));
 };
