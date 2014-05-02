@@ -6,6 +6,7 @@ var _ = require('lodash'),
 
 module.exports = function(app, passport, ip, port) {
 
+  console.log('************', ip, port);
   app.use(passport.initialize());
   app.use(passport.session());
 
