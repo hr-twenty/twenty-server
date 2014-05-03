@@ -77,7 +77,7 @@ exports.approve = function (data, callback) {
     if (err) return callback(err);
     // if both parties have approved, create a conversation node
     console.log('approved!', results)
-    if(results[2].otherToUserRel === 'APPROVED'){
+    if(results[0].otherToUserRel === 'APPROVED'){
       var query2 = [
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
         'CREATE UNIQUE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
