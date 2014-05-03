@@ -10,23 +10,23 @@ module.exports = function(app, passport) {
   app.get('/messages', messages.index);
   app.post('/messages', messages.create);
   app.get('/messages/:id', messages.show);
-  app.put('/messages/:id', messages.update);
-  app.delete('/messages/:id', messages.destroy);
+  // app.put('/messages/:id', messages.update);
+  // app.delete('/messages/:id', messages.destroy);
 
   // Stacks
   // app.use('/stacks', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.get('/stacks', stacks.index);
   app.post('/stacks', stacks.create);
-  app.get('/stacks/:id', stacks.show);
-  app.put('/stacks/:id', stacks.update);
-  app.delete('/stacks/:id', stacks.destroy);
+  // app.get('/stacks/:id', stacks.show);
+  // app.put('/stacks/:id', stacks.update);
+  // app.delete('/stacks/:id', stacks.destroy);
 
   // Users
   // app.use('/users', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.get('/users', users.index);
   app.post('/users', users.create);
-  app.get('/users/:id', users.show);
-  app.put('/users/:id', users.update);
+  // app.get('/users/:id', users.show);
+  // app.put('/users/:id', users.update);
   app.delete('/users/:id', users.destroy);
 
   // Registration

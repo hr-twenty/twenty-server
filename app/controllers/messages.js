@@ -4,7 +4,7 @@ var _ = require('lodash'),
 
 // GET /messages
 exports.index = function(req, res) {
-  Message.getAllMessages(function(err, messages) {
+  Message.getAllMessages(req.query, function(err, messages) {
     if (err) res.json(400, err);
     else res.json(req.query, messages);
   });

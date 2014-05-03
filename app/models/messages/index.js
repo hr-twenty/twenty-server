@@ -1,8 +1,8 @@
 /* global require, exports */
-var db = require('./db');
+var db = require('../../../config/neo4j');
 
 /*--------Conversation Methods-----------*/
-exports.getAllConversations = function(data, callback){
+exports.getAllMessages = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})',
     'SET user.lastActive = "'+ new Date().getTime()+'"',
@@ -23,7 +23,7 @@ exports.getAllConversations = function(data, callback){
   });
 };
 
-exports.getOneConversation = function(data, callback){
+exports.getOneMessage = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}}),',
     'path=(c)-[*]->(m:Message)',

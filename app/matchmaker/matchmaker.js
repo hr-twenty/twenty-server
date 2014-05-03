@@ -1,6 +1,6 @@
 /* global require, module */
 module.exports = function(db){
-  var db = db || require('../db');
+  var db = db || require('../../config/neo4j');
   return {
     /*
       function(id, callback)

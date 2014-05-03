@@ -9,6 +9,7 @@ var mocha = require('mocha'),
 
 
 describe('messages api', function() {
+  this.timeout(5000);
 
   var server,
       host = 'http://' + env.ip + ':' + env.port;
