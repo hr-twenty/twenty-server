@@ -12,9 +12,7 @@ exports.getStack = function (data, callback) {
     'MATCH (other)-[r3]->(otherInfo)',
     'WHERE type(r3) <> "HAS_CONVERSATION"',
     'AND type(r3) <> "HAS_STACK"',
-    'AND type(r3) <> "STACK_USER"',
-    'AND type(r3) <> "APPROVED"',
-    'AND type(r3) <> "REJECTED"',
+    'AND type(r3) <> "BELONGS_TO"',
     'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData, type(r2) as otherToUserRel',
     'ORDER BY type(r2)'
   ].join('\n');
@@ -25,50 +23,23 @@ exports.getStack = function (data, callback) {
 
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
-
-    
     //if there aren't enough users on the stack, get more users from the cluster
-    // if(results.length < 10){
-    //   matchMaker.matches(data.userId, function(err, results){
-    //     addAllMatchesToStack(data.userId, results, callback);
-    //   });
-    // } else {
+    if(results.length < 10){
+      console.log('hit match')
+      matchMaker.matches(data.userId, function(err,results){
+        processResults(results,callback);
+      });
+    } else {
     //otherwise, clean up the data and send it out
+      console.log('hit not match')
       processResults(results, callback);
-    // }
-  });
-};
-
-//Add the user to each other user in the array and vice versa 
-var addAllMatchesToStack = function(userId, array, callback){
-  var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
-    'WHERE other.userId IN ["'+array.join('","')+'"]',
-    'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
-    'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
-    'WITH other',
-    'LIMIT 40',
-    'MATCH (other)-[r3]->(otherInfo)',
-    'WHERE type(r3) <> "HAS_CONVERSATION"',
-    'AND type(r3) <> "HAS_STACK"',
-    'AND type(r3) <> "STACK_USER"',
-    'AND type(r3) <> "APPROVED"',
-    'AND type(r3) <> "REJECTED"',
-    'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData'
-  ].join('\n');
-
-  var params = {
-    userId: userId
-  };
-
-  db.query(query, params, function (err, results) {
-    if (err){return callback(err);}
-    else {processResults(results, callback);}
+    }
   });
 };
 
 //Clean up the data from Neo4j before sending to the front end
 var processResults = function(results, callback){
+      console.log('processResults', results)
   var finalResults = results.map(function(obj){
     var updatedObj = {};
     updatedObj.otherToUserRel = obj.otherToUserRel || 'STACK_USER';
@@ -108,13 +79,14 @@ exports.approve = function (data, callback) {
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
     // if both parties have approved, create a conversation node
+    console.log('approved!', results)
     if(results[0].otherToUserRel === 'APPROVED'){
       var query2 = [
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
         'MERGE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
-        'CREATE UNIQUE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-        'SET m.system = true',
-        'SET c.connectDate = "'+ new Date().getTime()+'"',
+        'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
+        'ON CREATE SET m.system = true',
+        'ON CREATE SET c.connectDate = "'+ new Date().getTime()+'"',
         'RETURN null'
       ].join('\n');
 
