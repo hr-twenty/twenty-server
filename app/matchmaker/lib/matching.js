@@ -32,7 +32,7 @@ module.exports = function(db){
         'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
         'WHERE user.userId <> other.userId',
         'AND NOT (us)-->(other)',
-        'CREATE UNIQUE (us)-[:STACK_USER]-(targetOther)',
+        'CREATE UNIQUE (us)-[:STACK_USER]-(other)',
         'CREATE UNIQUE (os)-[:STACK_USER]-(user)',
         'WITH other',
         'LIMIT 10',
