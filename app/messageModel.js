@@ -9,8 +9,10 @@ exports.getAllConversations = function(data, callback){
     'WITH user',
     'MATCH (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other:User),',
     '(other)-[:WORKS_FOR]->(company:Company),',
-    'path=(c)-[*]->(m:Message)',
-    'RETURN other, collect(m) as messages, c.connectDate as connectDate, collect(company) as company'
+    'WITH other, c, company',
+    'LIMIT 1',
+    'MATCH path=(c)-[*]->(m:Message)',
+    'RETURN other, collect(m) as messages, c.connectDate as connectDate, company'
   ].join('\n');
 
   var params = {
