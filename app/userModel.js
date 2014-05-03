@@ -118,8 +118,7 @@ exports.update = function (data, callback) {
 exports.del = function (data, callback) {
   // use a Cypher query to delete both this user and all of his relationships
   var query = [
-    'MATCH (user:User {userId:{userId}})-[r]-()',
-    'OPTIONAL MATCH (user)-[:HAS_STACK]->(stack:Stack)',
+    'MATCH (user:User {userId:{userId}})-[r]-(), (user)-[:HAS_STACK]->(stack:Stack)',
     'DELETE user,r, stack'
   ].join('\n');
 

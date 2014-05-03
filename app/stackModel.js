@@ -60,7 +60,7 @@ var processResults = function(results, callback){
 /*--------User Interaction with Stack Methods-----------*/
 exports.approve = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User {userId:{otherId}})',
+    'MATCH (user:User)-[:HAS_STACK]->(us:Stack)-[r1]->(other:User {userId:{otherId}})',
     'DELETE r1',
     'WITH us, other, user',
     'MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
@@ -77,28 +77,25 @@ exports.approve = function (data, callback) {
     if (err) return callback(err);
     // if both parties have approved, create a conversation node
     console.log('approved!', results)
-    if(results[0]){
-      if(results[0].otherToUserRel === 'APPROVED'){
-        var query2 = [
-          'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
-          'MERGE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
-          'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-          'ON CREATE SET m.system = true',
-          'ON CREATE SET c.connectDate = "'+ new Date().getTime()+'"',
-          'RETURN null'
-        ].join('\n');
+    if(results[2].otherToUserRel === 'APPROVED'){
+      var query2 = [
+        'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
+        'CREATE UNIQUE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
+        'WITH c',
+        'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
+        'ON CREATE SET m.system = true',
+        'ON CREATE SET c.connectDate = "'+ new Date().getTime()+'"',
+        'RETURN null'
+      ].join('\n');
 
-        var params2 = {
-          userId: data.userId,
-          otherId: data.otherId
-        };
+      var params2 = {
+        userId: data.userId,
+        otherId: data.otherId
+      };
 
-        db.query(query2, params2, function (err, results2) {        
-          callback(err, results2);
-        });
-      } else {
-        callback(err, results);
-      }
+      db.query(query2, params2, function (err, results2) {        
+        callback(err, results2);
+      });
     } else {
     //otherwise, send back the results
       callback(err, results);
@@ -132,7 +129,7 @@ exports.resetStack = function (data, callback) {
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User)',
     'DELETE r1',
     'WITH us, other',
-    'MERGE (us)-[:STACK_USER]->(other)',
+    'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
     'RETURN null'
   ].join('\n');
 
