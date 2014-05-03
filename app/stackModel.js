@@ -25,13 +25,11 @@ exports.getStack = function (data, callback) {
     if (err) return callback(err);
     //if there aren't enough users on the stack, get more users from the cluster
     if(results.length < 10){
-      console.log('hit match')
       matchMaker.matches(data.userId, function(err,results){
         processResults(results,callback);
       });
     } else {
     //otherwise, clean up the data and send it out
-      console.log('hit not match')
       processResults(results, callback);
     }
   });
@@ -39,7 +37,6 @@ exports.getStack = function (data, callback) {
 
 //Clean up the data from Neo4j before sending to the front end
 var processResults = function(results, callback){
-      console.log('processResults', results)
   var finalResults = results.map(function(obj){
     var updatedObj = {};
     updatedObj.otherToUserRel = (obj.otherToUserRel || 'STACK_USER');
