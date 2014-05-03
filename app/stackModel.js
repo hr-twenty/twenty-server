@@ -111,8 +111,10 @@ exports.approve = function (data, callback) {
     if(results[0].otherToUserRel === 'APPROVED'){
       var query2 = [
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
-        'MERGE (user)-[:HAS_CONVERSATION]->(m:Conversation)<-[:HAS_CONVERSATION]-(other)',
-        'SET m.connectDate = timestamp()',
+        'MERGE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
+        'CREATE UNIQUE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
+        'SET m.system = true',
+        'SET c.connectDate = "'+ new Date().getTime()+'"',
         'RETURN null'
       ].join('\n');
 
