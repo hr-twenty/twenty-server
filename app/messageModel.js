@@ -8,7 +8,7 @@ exports.getAllConversations = function(data, callback){
     'SET user.lastActive = "'+ new Date().getTime()+'"',
     'WITH user',
     'MATCH (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other:User),',
-    '(other)-[:WORKS_FOR]->(company:Company),',
+    '(other)-[:WORKS_FOR]->(company:Company)',
     'WITH other, c, company',
     'LIMIT 1',
     'MATCH path=(c)-[*]->(m:Message)',
