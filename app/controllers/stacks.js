@@ -1,20 +1,20 @@
 
-var Card = require('../models/cards.js');
+var Stack = require('../models/stacks.js');
 
-// GET /cards
+// GET /stacks
 exports.index = function(req, res) {
-  Card.getAll()
-  .then(function(cards) {
-    res.json(cards);
+  Stack.getAll()
+  .then(function(stacks) {
+    res.json(stacks);
   })
   .catch(function(err) {
     res.json(400, err);
   })
 };
 
-// POST /cards
+// POST /stacks
 exports.create = function(req, res) {
-  Card.create(req.body[0])
+  Stack.create(req.body[0])
   .then(function() {
     res.send(201);
   })
@@ -23,20 +23,20 @@ exports.create = function(req, res) {
   })
 };
 
-// GET /cards/:id
+// GET /stacks/:id
 exports.show = function(req, res) {
-  Card.getById(req.params)
-  .then(function(cards) {
-    res.json(cards);
+  Stack.getById(req.params)
+  .then(function(stacks) {
+    res.json(stacks);
   })
   .catch(function(err) {
     res.json(400, err)
   })
 };
 
-// PUT /cards/:id
+// PUT /stacks/:id
 exports.update = function(req, res) {
-  Card.update(req.params, req.body[0])
+  Stack.update(req.params, req.body[0])
   .then(function() {
     res.send(204);
   })
@@ -45,9 +45,9 @@ exports.update = function(req, res) {
   })
 };
 
-// DELETE /cards/:id
+// DELETE /stacks/:id
 exports.destroy = function(req, res) {
-  Card.remove(req.params)
+  Stack.remove(req.params)
   .then(function() {
     res.send(204);
   })

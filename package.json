@@ -23,12 +23,14 @@
     "express-session": "^1.0.3",
     "request": "^2.34.0",
     "neo4j": "~1.1.0",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "q": "^1.0.1"
   },
   "devDependencies": {
     "chai": "~1.9.1",
     "supertest-session": "0.0.1",
     "mocha": "^1.18.2",
-    "gulp": "^3.6.1"
+    "gulp": "^3.6.1",
+    "should": "^3.3.1"
   }
 }

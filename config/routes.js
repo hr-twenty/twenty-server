@@ -1,16 +1,9 @@
 
-var cards = require('../controllers/cards'),
-    messages = require('../controllers/messages'),
-    users = require('../controllers/users');
+var messages = require('../app/controllers/messages'),
+    stacks = require('../app/controllers/stacks'),
+    users = require('../app/controllers/users');
 
 module.exports = function(app, passport) {
-
-  // Cards
-  app.get('/cards', cards.index);
-  app.post('/cards', cards.create);
-  app.get('/cards/:id', cards.show);
-  app.put('/cards/:id', cards.update);
-  app.delete('/cards/:id', cards.destroy);
 
   // Messages
   app.get('/messages', messages.index);
@@ -18,6 +11,13 @@ module.exports = function(app, passport) {
   app.get('/messages/:id', messages.show);
   app.put('/messages/:id', messages.update);
   app.delete('/messages/:id', messages.destroy);
+
+  // Stacks
+  app.get('/stacks', stacks.index);
+  app.post('/stacks', stacks.create);
+  app.get('/stacks/:id', stacks.show);
+  app.put('/stacks/:id', stacks.update);
+  app.delete('/stacks/:id', stacks.destroy);
 
   // Users
   app.get('/users', users.index);
@@ -40,3 +40,4 @@ module.exports = function(app, passport) {
   });
 
 };
+

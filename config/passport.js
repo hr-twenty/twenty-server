@@ -1,7 +1,7 @@
-var _ = require('lodash'),
-    LinkedInStrategy = require('passport-linkedin-oauth2').Strategy,
+
+var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy,
     linkedin = require('./linkedin'),
-    User = require('../app/userModel');
+    User = require('../app/models/users');
 
 
 module.exports = function(app, passport, ip, port) {
@@ -38,29 +38,28 @@ module.exports = function(app, passport, ip, port) {
     ]
   }, function(req, accessToken, refreshToken, profile, done) {
 
-    var user = {
-      id: 'Not Entered',
-      firstName: 'Not Entered',
-      lastName: 'Not Entered',
-      headline: 'Not Entered',
-      pictureUrl: 'Not Entered',
-      numConnections: 'Not Entered',
-      industry: 'Not Entered'
-    };
-
-    _.merge(user, JSON.parse(profile._raw));
-
-    User.get({ userId: profile.id }, function(err, finalResults) {
-      if (err) throw err;
-      if (finalResults.length === 0) {
-        User.create(user, function(err) {
-          if (err) throw err;
-          console.log('User created...');
-        });
+    User.get({ id: profile.id })
+    .then(function(users) {
+      if (users.length > 0) {
+        User.update(profile._raw)
+        .then(function(users) {
+          console.log('User updated...');
+        })
+        .catch(function(err) {
+          console.error(err);
+        })
       } else {
-        // TODO: update user
-        console.log('User found...');
+        User.create(profile._raw)
+        .then(function(data) {
+          console.log('User created...');
+        })
+        .catch(function(err) {
+          console.error(err);
+        });
       }
+    })
+    .catch(function(err) {
+      console.error(err);
     });
 
     process.nextTick(function() {
