@@ -6,15 +6,15 @@ var matchMaker = require('./matchmaker/matchmaker')();
 exports.create = function (linkedInData, callback) {
   var query = [
     'MERGE (user:User {userId:{userId}, firstName:{firstName}, lastName:{lastName}, headline: {headline}, picture: {picture}, numConnections: {numConnections}})',
-    'CREATE UNIQUE (user) -[:HAS_STACK]-> (:Stack)',
+    'MERGE (user)-[:HAS_STACK]->(:Stack)',
     'WITH user',
     'SET user.lastActive = "'+new Date().getTime()+'"',
     'WITH user',
     'MERGE (location:Location {city:{locationCity}, country:{locationCountry}})',
-    'CREATE UNIQUE (user) -[:LIVES_IN]-> (location)',
+    'CREATE UNIQUE (user)-[:LIVES_IN]->(location)',
     'WITH user',
     'MERGE (industry:Industry {name:{industryName}})',
-    'CREATE UNIQUE (user) -[:WORKS_IN]-> (industry)',
+    'CREATE UNIQUE (user)-[:WORKS_IN]->(industry)',
     'WITH user',
     // Create all necessary position and company queries
     positionQuery(linkedInData),
@@ -28,6 +28,7 @@ exports.create = function (linkedInData, callback) {
     'MATCH (user)-[r]->(otherNode)',
     'WHERE type(r) <> "HAS_STACK"',
     'AND type(r) <> "BELONGS_TO"',
+    'AND type(r) <> "HAS_CONVERSATION"',
     'RETURN user, collect(type(r)) as relationships, collect(otherNode) as otherNodeData'
   ].join('\n');
 
