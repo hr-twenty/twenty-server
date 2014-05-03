@@ -42,7 +42,7 @@ var processResults = function(results, callback){
       console.log('processResults', results)
   var finalResults = results.map(function(obj){
     var updatedObj = {};
-    updatedObj.otherToUserRel = obj.otherToUserRel || 'STACK_USER';
+    updatedObj.otherToUserRel = (obj.otherToUserRel || 'STACK_USER');
     //get user data and put it directly on the object
     for(var key in obj.other.data){
       updatedObj[key] = obj.other.data[key];

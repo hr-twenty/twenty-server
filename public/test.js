@@ -119,9 +119,7 @@ var numConnections = function(){
 
 window.generateLotsaUsers = function(){
 
-  var i = 0;
-
-  while(i < 100){
+  setInterval(function(){
     data = {'educations': {
               'values': [
                 {
@@ -222,10 +220,9 @@ window.generateLotsaUsers = function(){
               ]
             }
           };
-    i++;
     $.post('/user', data, function(err, user){
       console.log(err)
       console.log(user)
     });
-  }
+  }, 1500);
 };
