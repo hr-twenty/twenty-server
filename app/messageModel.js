@@ -26,7 +26,8 @@ exports.getAllConversations = function(data, callback){
 exports.getOneConversation = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}}),',
-    'path=(c)-[:CONTAINS_MESSAGE]->(m:Message)',
+    'path=(c)-[*]->(m:Message)',
+    'WHERE m.time > {mostRecentMsg}',
     'RETURN other, c.connectDate as connectDate, collect(m) as messages',
   ].join('\n');
 
