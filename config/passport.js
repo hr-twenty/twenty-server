@@ -38,7 +38,7 @@ module.exports = function(app, passport, ip, port) {
     ]
   }, function(req, accessToken, refreshToken, profile, done) {
 
-    User.get({ id: profile.id })
+    User.getById({ id: profile.id })
     .then(function(users) {
       if (users.length > 0) {
         User.update(profile._raw)

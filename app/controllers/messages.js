@@ -1,58 +1,43 @@
 
-var Message = require('../models/messages.js');
+var Message = require('../models/messages/');
 
 // GET /messages
 exports.index = function(req, res) {
-  Message.getAll()
-  .then(function(messages) {
-    res.json(messages);
-  })
-  .catch(function(err) {
-    res.json(400, err);
-  })
+  Message.getAll(function(err, messages) {
+    if (err) res.json(400, err);
+    else res.json(messages);
+  });
 };
 
 // POST /messages
 exports.create = function(req, res) {
-  Message.create(req.body[0])
-  .then(function() {
-    res.send(201);
-  })
-  .catch(function(err) {
-    res.json(400, err);
-  })
+  Message.create(req.body[0], function(err) {
+    if (err) res.json(400, err);
+    else res.send(201);
+  });
 };
 
 // GET /messages/:id
 exports.show = function(req, res) {
-  Message.getById(req.params)
-  .then(function(messages) {
-    res.json(messages);
-  })
-  .catch(function(err) {
-    res.json(400, err)
-  })
+  Message.getById(req.params, function(err, messages) {
+    if (err) res.json(400, err);
+    else res.json(messages);
+  });
 };
 
 // PUT /messages/:id
 exports.update = function(req, res) {
-  Message.update(req.params, req.body[0])
-  .then(function() {
-    res.send(204);
-  })
-  .catch(function(err) {
-    res.json(400, err);
-  })
+  Message.update(req.params, req.body[0], function(err) {
+    if (err) res.json(400, err);
+    else res.send(204);
+  });
 };
 
 // DELETE /messages/:id
 exports.destroy = function(req, res) {
-  Message.remove(req.params)
-  .then(function() {
-    res.send(204);
-  })
-  .catch(function(err) {
-    res.json(400, err);
-  })
+  Message.remove(req.params, function(err) {
+    if (err) res.json(400, err);
+    else res.send(204);
+  });
 };
 

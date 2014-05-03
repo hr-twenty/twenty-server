@@ -8,7 +8,7 @@ var mocha = require('mocha'),
     app = express();
 
 
-describe('Users api', function() {
+describe('users api', function() {
 
   var server,
       host = 'http://' + env.ip + ':' + env.port;

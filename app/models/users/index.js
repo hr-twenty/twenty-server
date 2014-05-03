@@ -1,51 +1,25 @@
 /* global require, exports */
-var Q = require('q'),
-    db = require('../../config/neo4j');
-// var db = require('./db');
+var db = require('../../../config/neo4j');
 // var matchMaker = require('./matchmaker/matchmaker')();
 
-exports.getAll = function() {
-  var deferred = Q.defer();
-
-  deferred.resolve();
-  // db.query('MATCH (n:`User`) RETURN n LIMIT 25', {}, function(err, results) {
-  //   if (err) deferred.reject(err);
-  //   else deferred.resolve(results);
-  // });
-
-  return deferred.promise;
+exports.getAll = function(cb) {
+  cb(null, {});
 };
 
-exports.create = function(params) {
-  var deferred = Q.defer();
-
-  deferred.resolve();
-
-  return deferred.promise;
+exports.create = function(user, cb) {
+  cb(null, {});
 };
 
-exports.getById = function(params) {
-  var deferred = Q.defer();
-
-  deferred.resolve();
-
-  return deferred.promise;
+exports.getById = function(params, cb) {
+  cb(null, {});
 };
 
-exports.update = function(params) {
-  var deferred = Q.defer();
-
-  deferred.resolve();
-
-  return deferred.promise;
+exports.update = function(params, user, cb) {
+  cb(null, {});
 };
 
-exports.remove = function(params) {
-  var deferred = Q.defer();
-
-  deferred.resolve();
-
-  return deferred.promise;
+exports.remove = function(params, cb) {
+  cb(null, {});
 };
 
 //
