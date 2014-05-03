@@ -7,7 +7,7 @@ var express = require('express'),
 function bootstrap(ip, port, envType) {
   require('./config/express')(app, express, env);
   require('./config/passport')(app, passport, ip, port);
-  require('./app/routes')(app, passport);
+  require('./config/routes')(app, passport);
 
   var server = app.listen(app.get('port'), function() {
     console.log('Server listening at %s on port %d in %s environment...', ip, port, envType);
