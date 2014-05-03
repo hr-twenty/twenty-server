@@ -121,7 +121,7 @@ window.generateLotsaUsers = function(){
 
   var i = 0;
 
-  while(i < 1){
+  while(i < 100){
     data = {'educations': {
               'values': [
                 {

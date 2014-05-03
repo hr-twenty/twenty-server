@@ -57,29 +57,29 @@ describe('messages api', function() {
     });
   });
 
-  describe('update action', function() {
-    it('should respond with 204 on success', function(done) {
-      request.put({
-        url: host + '/messages/1',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify([{}])
-      }, function(err, res) {
-        res.statusCode.should.equal(204);
-        done();
-      })
-    });
-  });
+  // describe('update action', function() {
+  //   it('should respond with 204 on success', function(done) {
+  //     request.put({
+  //       url: host + '/messages/1',
+  //       headers: { 'content-type': 'application/json' },
+  //       body: JSON.stringify([{}])
+  //     }, function(err, res) {
+  //       res.statusCode.should.equal(204);
+  //       done();
+  //     })
+  //   });
+  // });
 
-  describe('destroy action', function() {
-    it('should respond with 204 on success', function(done) {
-      request.del({
-        url: host + '/messages/1',
-        headers: { 'content-type': 'application/json' }
-      }, function(err, res) {
-        res.statusCode.should.equal(204);
-        done();
-      });
-    });
-  });
+  // describe('destroy action', function() {
+  //   it('should respond with 204 on success', function(done) {
+  //     request.del({
+  //       url: host + '/messages/1',
+  //       headers: { 'content-type': 'application/json' }
+  //     }, function(err, res) {
+  //       res.statusCode.should.equal(204);
+  //       done();
+  //     });
+  //   });
+  // });
 
 });
