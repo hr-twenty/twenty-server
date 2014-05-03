@@ -6,6 +6,7 @@ var messages = require('../app/controllers/messages'),
 module.exports = function(app, passport) {
 
   // Messages
+  // app.use('/messages', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.get('/messages', messages.index);
   app.post('/messages', messages.create);
   app.get('/messages/:id', messages.show);
@@ -13,6 +14,7 @@ module.exports = function(app, passport) {
   app.delete('/messages/:id', messages.destroy);
 
   // Stacks
+  // app.use('/stacks', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.get('/stacks', stacks.index);
   app.post('/stacks', stacks.create);
   app.get('/stacks/:id', stacks.show);
@@ -20,6 +22,7 @@ module.exports = function(app, passport) {
   app.delete('/stacks/:id', stacks.destroy);
 
   // Users
+  // app.use('/users', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.get('/users', users.index);
   app.post('/users', users.create);
   app.get('/users/:id', users.show);
