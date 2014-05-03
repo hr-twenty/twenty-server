@@ -28,14 +28,14 @@ exports.getStack = function (data, callback) {
 
     
     //if there aren't enough users on the stack, get more users from the cluster
-    if(results.length < 10){
-      matchMaker.matches(data.userId, function(err, results){
-        addAllMatchesToStack(data.userId, results, callback);
-      });
-    } else {
+    // if(results.length < 10){
+    //   matchMaker.matches(data.userId, function(err, results){
+    //     addAllMatchesToStack(data.userId, results, callback);
+    //   });
+    // } else {
     //otherwise, clean up the data and send it out
       processResults(results, callback);
-    }
+    // }
   });
 };
 
