@@ -15,10 +15,10 @@ exports.positionQuery = function(user){
     var isCurrentDate = function(p){
       console.log('isCurrentDate', p)
       if(p.isCurrent === 'true'){
-        console.log('true' p.isCurrent)
+        console.log('true', p.isCurrent);
         return 'Present';}
       else {
-        console.log('false' p.endDate)
+        console.log('false', p.endDate);
         return p.endDate.year;}
     };
     user.positions.values.forEach(function(p){
