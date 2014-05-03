@@ -82,7 +82,7 @@ exports.approve = function (data, callback) {
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
         'CREATE UNIQUE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
         'WITH c',
-        'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
+        'CREATE UNIQUE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
         'ON CREATE SET m.system = true',
         'ON CREATE SET c.connectDate = "'+ new Date().getTime()+'"',
         'RETURN null'
