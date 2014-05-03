@@ -83,8 +83,8 @@ exports.approve = function (data, callback) {
         'CREATE UNIQUE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
         'WITH c',
         'CREATE UNIQUE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-        'ON CREATE SET m.system = true',
-        'ON CREATE SET c.connectDate = "'+ new Date().getTime()+'"',
+        'SET m.system = true',
+        'SET c.connectDate = "'+ new Date().getTime()+'"',
         'RETURN null'
       ].join('\n');
 
