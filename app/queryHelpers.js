@@ -5,16 +5,16 @@ exports.positionQuery = function(user){
   if(user.positions){
     var finalResult = '';
     var isCurrentPos = function(p){
-      if(p.isCurrent === 'true'){return 'ROLE_IS';} 
+      if(p.isCurrent === 'true' || p.isCurrent === true){return 'ROLE_IS';} 
       else {return 'ROLE_WAS';}
     };
     var isCurrentCo = function(p){
-      if(p.isCurrent === 'true'){return 'WORKS_FOR';} 
+      if(p.isCurrent === 'true' || p.isCurrent === true){return 'WORKS_FOR';} 
       else {return 'WORKED_FOR';}
     };
     var isCurrentDate = function(p){
       console.log('isCurrentDate', p)
-      if(p.isCurrent === 'true'){
+      if(p.isCurrent === 'true' || p.isCurrent === true){
         console.log('true', p.isCurrent);
         return 'Present';}
       else {
