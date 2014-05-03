@@ -13,7 +13,7 @@ exports.getStack = function (data, callback) {
     'WHERE type(r3) <> "HAS_CONVERSATION"',
     'AND type(r3) <> "HAS_STACK"',
     'AND type(r3) <> "BELONGS_TO"',
-    'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData, type(r2) as otherToUserRel',
+    'RETURN DISTINCT other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData, type(r2) as otherToUserRel',
     'ORDER BY type(r2)'
   ].join('\n');
 
@@ -96,6 +96,8 @@ exports.approve = function (data, callback) {
         db.query(query2, params2, function (err, results2) {        
           callback(err, results2);
         });
+      } else {
+        callback(err, results);
       }
     } else {
     //otherwise, send back the results
