@@ -13,8 +13,13 @@ exports.positionQuery = function(user){
       else {return 'WORKED_FOR';}
     };
     var isCurrentDate = function(p){
-      if(p.isCurrent === 'true'){return 'Present';}
-      else {return p.endDate.month+'-'+p.endDate.year;}
+      console.log('isCurrentDate', p)
+      if(p.isCurrent === 'true'){
+        console.log('true' p.isCurrent)
+        return 'Present';}
+      else {
+        console.log('false' p.endDate)
+        return p.endDate.year;}
     };
     user.positions.values.forEach(function(p){
       finalResult += 'MERGE (position:Position {title:"'+p.title+'"}) '+
