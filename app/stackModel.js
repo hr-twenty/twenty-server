@@ -60,7 +60,7 @@ var processResults = function(results, callback){
 /*--------User Interaction with Stack Methods-----------*/
 exports.approve = function (data, callback) {
   var query = [
-    'MATCH (user:User)-[:HAS_STACK]->(us:Stack)-[r1]->(other:User {userId:{otherId}})',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User {userId:{otherId}})',
     'DELETE r1',
     'WITH us, other, user',
     'MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
