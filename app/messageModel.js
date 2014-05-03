@@ -40,7 +40,7 @@ exports.getOneConversation = function(data, callback){
   };
 
   db.query(query, params, function (err, results) {
-    if (err){return callback(err);}
+    if (err){callback(err);}
     else {processMessages(data.userId, results, callback);}
   });
 };

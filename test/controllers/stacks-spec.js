@@ -29,17 +29,43 @@ describe('stacks api', function() {
 
   describe('index action', function() {
     it('should respond with 200 on success', function(done) {
-      request.get(host + '/stacks', function(err, res) {
+      request.get(host + '/userStack', function(err, res) {
         res.statusCode.should.equal(200);
         done();
       });
     });
   });
 
-  describe('create action', function() {
+  describe('create (approve) action', function() {
     it('should respond with 201 on success', function(done) {
       request.post({
-        url: host + '/stacks',
+        url: host + '/userStacks/approve',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify([{}])
+      }, function(err, res) {
+        res.statusCode.should.equal(201);
+        done();
+      })
+    });
+  });
+
+  describe('create (reject) action', function() {
+    it('should respond with 201 on success', function(done) {
+      request.post({
+        url: host + '/userStacks/reject',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify([{}])
+      }, function(err, res) {
+        res.statusCode.should.equal(201);
+        done();
+      })
+    });
+  });
+
+  describe('create (reset) action', function() {
+    it('should respond with 201 on success', function(done) {
+      request.post({
+        url: host + '/userStacks/reset',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify([{}])
       }, function(err, res) {

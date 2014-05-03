@@ -3,22 +3,25 @@ var User = require('../userModel'),
     helper = require('./helper');
 
 // POST /user
-exports.createNewUser = function(req, res){
+exports.create = function(req, res){
   var userData = req.body;
   User.create(userData, helper.respond(res, 400, 201));
 };
 
-exports.getUserData = function(req, res){
+// GET /user
+exports.show = function(req, res){
   var userData = req.query;
   User.get(userData, helper.respond(res));
 };
 
-exports.updateUser = function(req, res){
+// PUT /user
+exports.update = function(req, res){
   var userData = req.body;
   User.save(userData, helper.respond(res));
 };
 
-exports.deleteUser = function(req, res){
+// DELETE /user
+exports.destroy = function(req, res){
   var userData = req.body;
   User.del(userData, helper.respond(res));
 };

@@ -28,34 +28,46 @@ describe('messages api', function() {
   });
 
   describe('index action', function() {
-    it('should respond with 200 on success', function(done) {
-      request.get(host + '/messages', function(err, res) {
-        res.statusCode.should.equal(200);
-        done();
+    it('should respond with 400 when missing a userId', function(done) {
+      request.get(host + '/conversations/all', function(err, res) {
+        res.statusCode.should.equal(400);
       });
     });
+
+    // it('should respond with 200 on success', function(done) {
+    //   request.get(host + '/conversations/all?userId=LlcbXt5tlt', function(err, res) {
+    //     res.statusCode.should.equal(200);
+    //     done();
+    //   });
+    // });
   });
 
   describe('create action', function() {
-    it('should respond with 201 on success', function(done) {
-      request.post({
-        url: host + '/messages',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify([{}])
-      }, function(err, res) {
-        res.statusCode.should.equal(201);
-        done();
-      })
-    });
+    // it('should respond with 201 on success', function(done) {
+    //   request.post({
+    //     url: host + '/conversations/one',
+    //     headers: { 'content-type': 'application/json' },
+    //     body: JSON.stringify([{}])
+    //   }, function(err, res) {
+    //     res.statusCode.should.equal(201);
+    //     done();
+    //   })
+    // });
   });
 
   describe('show action', function() {
-    it('should respond with 200 on success', function(done) {
-      request.get(host + '/messages/1', function(err, res) {
-        res.statusCode.should.equal(200);
-        done();
+    it('should respond with 400 when missing a userId, otherId, text and time', function(err, res) {
+      request.get(host + '/conversations/one', function(err, res) {
+        res.statusCode.should.equal(400);
       });
     });
+
+    // it('should respond with 200 on success', function(done) {
+    //   request.get(host + '/conversations/one?userId=LlcbXt5tlt&', function(err, res) {
+    //     res.statusCode.should.equal(200);
+    //     done();
+    //   });
+    // });
   });
 
   // describe('update action', function() {

@@ -6,23 +6,21 @@ var messages = require('../app/controllers/messages'),
 module.exports = function(app, passport) {
 
   // app.use('/user', passport.authorize('linkedin', { failureRedirect: '/login' }))
-  app.get('/user', users.getUserData);
-  app.post('/user', users.createNewUser);
-  app.put('/user', users.updateUser);
-  app.del('/user', users.deleteUser);
+  app.get('/user', users.show);
+  app.post('/user', users.create);
+  app.put('/user', users.update);
+  app.del('/user', users.destroy);
 
   //UserStack
   // app.use('/userStack', passport.authorize('linkedin', { failureRedirect: '/login' }))
-  app.post('/userStack/approve', stacks.approve);
-  app.post('/userStack/reject', stacks.reject);
-  app.post('/userStack/reset', stacks.resetStack);
-  app.get('/userStack', stacks.getStack);
+  app.post('/userStack/:action', stacks.create);
+  app.get('/userStack', stacks.show);
 
   //Messages
   // app.use('/conversations', passport.authorize('linkedin', { failureRedirect: '/login' }))
-  app.get('/conversations/all', messages.getAllConversations);
-  app.get('/conversations/one', messages.getOneConversation);
-  app.post('/conversations/one', messages.sendMessage);
+  app.get('/conversations/all', messages.index);
+  app.get('/conversations/one', messages.show);
+  app.post('/conversations/one', messages.create);
 
   // Sign in/out
   app.get('/login', function(req, res) {
