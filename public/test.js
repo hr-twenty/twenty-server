@@ -119,7 +119,6 @@ var numConnections = function(){
 
 window.generateLotsaUsers = function(){
 
-  setInterval(function(){
     data = {'educations': {
               'values': [
                 {
@@ -224,5 +223,4 @@ window.generateLotsaUsers = function(){
       console.log(err)
       console.log(user)
     });
-  }, 1500);
 };
