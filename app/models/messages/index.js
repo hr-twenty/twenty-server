@@ -1,8 +1,8 @@
 /* global require, exports */
-var db = require('./db');
+var db = require('../../../config/neo4j');
 
 /*--------Conversation Methods-----------*/
-exports.getAllConversations = function(data, callback){
+exports.getAll = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})',
     'SET user.lastActive = "'+ new Date().getTime()+'"',
@@ -23,7 +23,7 @@ exports.getAllConversations = function(data, callback){
   });
 };
 
-exports.getOneConversation = function(data, callback){
+exports.getOne = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}}),',
     '(other)-[:WORKS_FOR]->(company:Company)',
@@ -34,6 +34,7 @@ exports.getOneConversation = function(data, callback){
     'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages'
   ].join('\n');
 
+  // need to check for missing params due to bug in node-neo4j
   var params = {
     userId: data.userId,
     otherId: data.otherId,

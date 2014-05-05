@@ -12,4 +12,5 @@ $ NODE_ENV=(production|development) node server.js
 ```bash
 $ neo4j start
 $ mocha test/controllers
+$ mocha test/models
 ```
