@@ -74,7 +74,50 @@ exports.get = function (data, callback) {
   });
 };
 
+exports.del = function (data, callback) {
+  // use a Cypher query to delete both this user and all of his relationships
+  var query = [
+    'MATCH (user:User {userId:{userId}})-[r]-()',
+    'DELETE user,r',
+    'WITH user',
+    'MATCH (user)-[a:HAS_STACK]->(stack:Stack)',
+    'DELETE stack'
+  ].join('\n');
 
+  var params = {
+    userId: data.userId
+  };
+
+  db.query(query, params, function (err) {
+    callback(err);
+  });
+};
+
+//Clean up the data from Neo4j before sending to the front end
+var processResults = function(results, callback){
+  var finalResults = results.map(function(obj){
+    var updatedObj = {};
+    //get user data and put it directly on the object
+    for(var key in obj.user.data){
+      updatedObj[key] = obj.user.data[key];
+    }
+    //for each relationship, create a key of the relationship type and a value of that relationship's data
+    for(var i = 0; i < obj.relationships.length; i++){
+      if(updatedObj[obj.relationships[i]]){
+        updatedObj[obj.relationships[i]].push(obj.otherNodeData[i].data);
+      } else {
+        updatedObj[obj.relationships[i]] = [obj.otherNodeData[i].data];
+      }
+    }
+    return updatedObj;
+  });
+  callback(null, finalResults);
+};
+
+
+
+
+//THIS FEATURE IS NOT MVP
 //template for update data
 //var data = {userId:'3', previous:[{"WORKS_AT":{name:'Twitter'}}], current:[{"WORKED_AT":{name:'Twitter'},{"WORKS_AT":{name:'Google'}}]
 exports.update = function (data, callback) {
@@ -113,41 +156,4 @@ exports.update = function (data, callback) {
   // db.query(query, null, function (err) {
   //   callback(err);
   // });
-};
-
-exports.del = function (data, callback) {
-  // use a Cypher query to delete both this user and all of his relationships
-  var query = [
-    'MATCH (user:User {userId:{userId}})-[r]-(), (user)-[:HAS_STACK]->(stack:Stack)',
-    'DELETE user,r, stack'
-  ].join('\n');
-
-  var params = {
-    userId: data.userId
-  };
-
-  db.query(query, params, function (err) {
-    callback(err);
-  });
-};
-
-//Clean up the data from Neo4j before sending to the front end
-var processResults = function(results, callback){
-  var finalResults = results.map(function(obj){
-    var updatedObj = {};
-    //get user data and put it directly on the object
-    for(var key in obj.user.data){
-      updatedObj[key] = obj.user.data[key];
-    }
-    //for each relationship, create a key of the relationship type and a value of that relationship's data
-    for(var i = 0; i < obj.relationships.length; i++){
-      if(updatedObj[obj.relationships[i]]){
-        updatedObj[obj.relationships[i]].push(obj.otherNodeData[i].data);
-      } else {
-        updatedObj[obj.relationships[i]] = [obj.otherNodeData[i].data];
-      }
-    }
-    return updatedObj;
-  });
-  callback(null, finalResults);
 };
