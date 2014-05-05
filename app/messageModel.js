@@ -9,8 +9,10 @@ exports.getAllConversations = function(data, callback){
     'WITH user',
     'MATCH (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other:User)',
     'WITH c, other',
+    'MATCH (other)-[:WORKS_FOR]->(co:Company)',
+    'WITH c, other, co',
     'MATCH path=(c)-[*]->(m:Message)',
-    'RETURN other, collect(m) as messages, c.connectDate as connectDate'
+    'RETURN other, collect(m) as messages, c.connectDate as connectDate, co as company'
   ].join('\n');
 
   var params = {
@@ -55,7 +57,7 @@ var processMessages = function(userId, results, callback){
       firstName: obj.other.data.firstName,
       lastName: obj.other.data.lastName,
       picture: obj.other.data.picture,
-      WORKS_FOR: obj.company,
+      WORKS_FOR: obj.company.data.name,
       lastActive: obj.other.data.lastActive
     };
     obj.connectDate = obj.connectDate;
