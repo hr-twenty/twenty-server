@@ -14,16 +14,18 @@ module.exports = function(db){
       'MATCH (target)<-[:BELONGS_TO]-(targetOther:User), (user)-[:HAS_STACK]->(us:Stack), (targetOther:User)-[:HAS_STACK]->(os:Stack)',
       'WHERE (user)-[:LIVES_IN]->(:Location)<-[:LIVES_IN]-(targetOther)',
       'AND NOT (us)-->(targetOther)',
+      'WITH user, us, targetOther, os',
+      'LIMIT 10',
       'CREATE UNIQUE (us)-[:STACK_USER]->(targetOther)',
       'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
       'WITH targetOther',
-      'LIMIT 10',
       //find the information about the targetOther user to return to the front end
       'MATCH (targetOther)-[r3]->(otherInfo)',
       'WHERE type(r3) <> "HAS_CONVERSATION"',
       'AND type(r3) <> "HAS_STACK"',
       'AND type(r3) <> "BELONGS_TO"',
-      'RETURN targetOther, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData'
+      'RETURN targetOther, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData',
+      'LIMIT 10'
     ].join('\n');
 
     var params = {
@@ -36,6 +38,8 @@ module.exports = function(db){
         'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
         'WHERE user.userId <> other.userId',
         'AND NOT (us)-->(other)',
+        'WITH user, other, us, os',
+        'LIMIT 10',
         'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
         'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
         'WITH other',
@@ -43,8 +47,7 @@ module.exports = function(db){
         'WHERE type(r3) <> "HAS_CONVERSATION"',
         'AND type(r3) <> "HAS_STACK"',
         'AND type(r3) <> "BELONGS_TO"',
-        'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData',
-        'LIMIT 10'
+        'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData'
       ].join('\n');
 
       var params = {
