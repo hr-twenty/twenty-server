@@ -21,16 +21,19 @@ exports.getStack = function (data, callback) {
     userId: data.userId
   };
 
-  db.query(query, params, function (err, results) {
+  db.query(query, params, function (err, stackResults) {
     if (err) return callback(err);
     //if there aren't enough users on the stack, get more users from the cluster
-    if(results.length < 10){
-      matchMaker.matches(data.userId, function(err,results){
-        processResults(results,callback);
+    if(stackResults.length < 10){
+      matchMaker.matches(data.userId, function(err,clusterResults){
+        var finalResults = [];
+        finalResults=finalResults.concat(stackResults);
+        finalResults=finalResults.concat(clusterResults);
+        processResults(finalResults,callback);
       });
     } else {
     //otherwise, clean up the data and send it out
-      processResults(results, callback);
+      processResults(stackResults, callback);
     }
   });
 };

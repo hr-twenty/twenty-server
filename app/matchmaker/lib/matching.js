@@ -32,7 +32,6 @@ module.exports = function(db){
 
     db.query(query, params, function(err, results){
       if (err) return callback(err);
-
       var query = [
         'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
         'WHERE user.userId <> other.userId',
@@ -40,12 +39,12 @@ module.exports = function(db){
         'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
         'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
         'WITH other',
-        'LIMIT 10',
         'MATCH (other)-[r3]->(otherInfo)',
         'WHERE type(r3) <> "HAS_CONVERSATION"',
         'AND type(r3) <> "HAS_STACK"',
         'AND type(r3) <> "BELONGS_TO"',
-        'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData'
+        'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData',
+        'LIMIT 10'
       ].join('\n');
 
       var params = {
