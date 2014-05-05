@@ -1,7 +1,7 @@
-var _ = require('lodash'),
-    LinkedInStrategy = require('passport-linkedin-oauth2').Strategy,
-    linkedin = require('./linkedin'),
-    User = require('../app/userModel');
+var _ = require('lodash');
+var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+var linkedin = require('./linkedin');
+var User = require('../app/userModel');
 
 
 module.exports = function(app, passport, ip, port) {
