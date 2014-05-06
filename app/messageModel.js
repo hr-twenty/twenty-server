@@ -12,7 +12,7 @@ exports.getAllConversations = function(data, callback){
     'MATCH (other)-[:WORKS_FOR]->(company:Company)',
     'WITH c, other, company',
     'MATCH path=(c)-[*]->(m:Message)',
-    'RETURN other, collect(m) as messages, c.connectDate as connectDate, company'
+    'RETURN other, collect(m) as messages, c.connectDate as connectDate, collect(company) as company'
   ].join('\n');
 
   var params = {
@@ -57,7 +57,7 @@ var processMessages = function(userId, results, callback){
       firstName: obj.other.data.firstName,
       lastName: obj.other.data.lastName,
       picture: obj.other.data.picture,
-      WORKS_FOR: obj.company.data.name,
+      WORKS_FOR: obj.company[0].data,
       lastActive: obj.other.data.lastActive
     };
     obj.connectDate = obj.connectDate;
