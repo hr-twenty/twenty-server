@@ -1,14 +1,36 @@
 var userModel = require('../../app/userModel');
 var expect = require('chai').expect;
-var db = require('../../app/db')
+var env = require('../../config/env')('test');
+var neo4j = require('neo4j');
+var db = new neo4j.GraphDatabase(env.databaseUri);
+
 
 describe('user', function(){
   var linkedinData = {
-
-    
+    userId: '1',
+    firstName:'Shane', 
+    lastName:'Keller', 
+    headline:'booya grandma!', 
+    picture:'url', 
+    numConnections:4, 
+    locationCity:'San Francisco', 
+    locationCountry:'USA',
+    industryName: 'Software',
+    curPositionTitle: 'Software Engineer',
+    curCompanyName: 'Hack Reactor',
+    curCompanyStartDate: '4-1-2014',
+    curCompanyEndDate: 'Present',
+    companySize: '1-49',
+    languageName: 'English',
+    languageProficiency: 'Native speaker',
+    skillName: 'Angular.JS',
+    schoolName: 'USC',
+    schoolFieldOfStudy: 'Economics',
+    schoolStartDate: '8-1-2005',
+    schoolEndDate: '5-1-2010'
   };
 
-  describe('creating and deleting', function(done){
+  describe('created user', function(done){
     beforeEach(function(done){
       userModel.create(linkedinData, function(err, result){
 
@@ -18,7 +40,7 @@ describe('user', function(){
 
     afterEach(function(done){
       userModel.del(linkedinData, function(err){
-        expect(err).to.not.equal(null);
+        expect(err).to.equal(null);
         db.query(
           'MATCH (user:User {userId:{userId}}) RETURN user.userId',
           {userId: linkedinData.userId}, 
@@ -34,6 +56,7 @@ describe('user', function(){
         'MATCH (user:User {userId:{userId}}) RETURN user.userId',
         {userId: linkedinData.userId}, 
       function(err, result){
+        expect(err).to.equal(null);
         expect(result.length).to.equal(1);
         done();
       });
