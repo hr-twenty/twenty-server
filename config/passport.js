@@ -43,7 +43,7 @@ module.exports = function(app, passport, ip, port) {
       firstName: 'Not Entered',
       lastName: 'Not Entered',
       headline: 'Not Entered',
-      pictureUrl: 'Not Entered',
+      pictureUrl: 'http://static2.businessinsider.com/image/509802cb69bedd6209000009/nicolas-cage-will-be-in-the-expendables-3.jpg',
       numConnections: 'Not Entered',
       industry: 'Not Entered'
     };
