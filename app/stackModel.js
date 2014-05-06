@@ -81,12 +81,12 @@ exports.approve = function (data, callback) {
     // if both parties have approved, create a conversation node
     if(results[0].otherToUserRel === 'APPROVED'){
       var query2 = [
-        'MERGE (c:Conversation)-[:CONTAINS_MESSAGE]->(m:Message)',
+        'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
+        'CREATE UNIQUE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
+        'WITH c',
+        'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
         'ON CREATE SET m.system = true',
         'ON CREATE SET c.connectDate = "'+ new Date().getTime()+'"',
-        'WITH c',
-        'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
-        'CREATE UNIQUE (user)-[:HAS_CONVERSATION]->(c)<-[:HAS_CONVERSATION]-(other)',
         'RETURN null'
       ].join('\n');
 
