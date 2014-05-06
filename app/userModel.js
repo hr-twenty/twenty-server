@@ -5,6 +5,11 @@ var matchMaker = require('./matchmaker/matchmaker')();
 
 /*--------User Methods-----------*/
 exports.create = function (linkedInData, callback) {
+
+  dataChecker(linkedInData, function(missingData){
+    if(missingData){return callback('Userdata is missing '+ missingData);}
+  });
+
   var query = [
     'MERGE (user:User {userId:{userId}, firstName:{firstName}, lastName:{lastName}, headline: {headline}, picture: {picture}, numConnections: {numConnections}})',
     'MERGE (user)-[:HAS_STACK]->(:Stack)',
@@ -54,6 +59,7 @@ exports.create = function (linkedInData, callback) {
       matchMaker.classify(linkedInData.id, function(){});
     }
   });
+
 };
 
 exports.get = function (data, callback) {
@@ -114,8 +120,19 @@ var processResults = function(results, callback){
   callback(null, finalResults);
 };
 
-
-
+//Confirm that all the necessary components are in LinkedInData
+var dataChecker = function(linkedInData, callback){
+  if(!linkedInData.id){callback('id');}
+  if(!linkedInData.firstName){callback('firstName');}
+  if(!linkedInData.lastName){callback('lastName');}
+  if(!linkedInData.headline){callback('headline');}
+  if(!linkedInData.pictureUrl){callback('pictureUrl');}
+  if(!linkedInData.numConnections){callback('numConnections');}
+  if(!linkedInData.location){callback('location');}
+  if(!linkedInData.location.name){callback('location.name');}
+  if(!linkedInData.location.country.code){callback('location.country');}
+  if(!linkedInData.industry){callback('industry');}
+};
 
 //THIS FEATURE IS NOT MVP
 //template for update data
