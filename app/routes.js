@@ -42,9 +42,7 @@ module.exports = function(app, passport) {
   app.get('/auth/linkedin/callback',
     passport.authenticate('linkedin', { failureRedirect: '/login' }),
     function(req, res) {
-      // TODO: don't hardcode address
-      // only works in testing on chrome; doesn't work on mobile devices
-      res.redirect('http://localhost:3000/#/loading?userId=' + req.user.id);
+      res.json({ userId: req.user.id });
     }
   );
 
