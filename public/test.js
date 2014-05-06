@@ -224,5 +224,5 @@ window.generateLotsaUsers = function(){
       console.log(err)
       console.log(user)
     });
-  }, 1500);
+  },1500);
 };

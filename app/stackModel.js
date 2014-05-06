@@ -79,7 +79,6 @@ exports.approve = function (data, callback) {
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
     // if both parties have approved, create a conversation node
-    console.log('approved!', results)
     if(results[0].otherToUserRel === 'APPROVED'){
       var query2 = [
         'CREATE (c:Conversation)-[:CONTAINS_MESSAGE]->(m:Message)',
