@@ -5,13 +5,14 @@ var db = require('./db');
 exports.getAllConversations = function(data, callback){
   var query = [
     'MATCH (user:User {userId:{userId}})',
-    'SET user.lastActive = '+ new Date().getTime(),
+    'SET user.lastActive = "'+ new Date().getTime()+'"',
     'WITH user',
-    'MATCH (user)--(c:Conversation)--(other:User),',
-    '(other)-[:WORKS_FOR]->(company:Company)',
-    'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-    'RETURN other, collect(m) as messages, c.connectDate as connectDate, company',
-    'ORDER BY m.time'
+    'MATCH (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other:User)',
+    'WITH c, other',
+    'MATCH (other)-[:WORKS_FOR]->(company:Company)',
+    'WITH c, other, company',
+    'MATCH path=(c)-[*]->(m:Message)',
+    'RETURN other, collect(m) as messages, c.connectDate as connectDate, company'
   ].join('\n');
 
   var params = {
@@ -26,11 +27,13 @@ exports.getAllConversations = function(data, callback){
 
 exports.getOneConversation = function(data, callback){
   var query = [
-    'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}})',
-    'OPTIONAL MATCH (c)-[:CONTAINS_MESSAGE]->(m:Message)',
+    'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}}),',
+    '(other)-[:WORKS_FOR]->(company:Company)',
+    'WITH other, c, company',
+    'LIMIT 1',
+    'MATCH path=(c)-[*]->(m:Message)',
     'WHERE m.time > {mostRecentMsg}',
-    'RETURN other, c.connectDate as connectDate, collect(m) as messages',
-    'ORDER BY m.time'
+    'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages, company'
   ].join('\n');
 
   var params = {
@@ -54,8 +57,8 @@ var processMessages = function(userId, results, callback){
       firstName: obj.other.data.firstName,
       lastName: obj.other.data.lastName,
       picture: obj.other.data.picture,
-      lastActive: obj.other.data.lastActive,
-      company: obj.company.data.name
+      WORKS_FOR: obj.company.data.name,
+      lastActive: obj.other.data.lastActive
     };
     obj.connectDate = obj.connectDate;
     obj.messages = obj.messages.map(function(obj2){
@@ -73,8 +76,12 @@ var processMessages = function(userId, results, callback){
 
 exports.sendMessage = function(data, callback){
   var query = [
-    'MATCH (user:User {userId:{userId}})-->(c:Conversation)<--(other:User {userId:{otherId}})',
-    'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message {sender:{userId}, text:{text}, time:{time}})',
+    'MATCH (user:User {userId:{userId}})-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other:User {userId:{otherId}})',
+    'WITH c',
+    'MATCH (c)-[r:CONTAINS_MESSAGE]->(m2:Message)',
+    'DELETE r',
+    'WITH c, m2',
+    'CREATE UNIQUE (c)-[:CONTAINS_MESSAGE]->(m:Message {sender:{userId}, text:{text}, time:{time}})-[:CONTAINS_MESSAGE]->(m2)',
     'RETURN null'
   ].join('\n');
 
