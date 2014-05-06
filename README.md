@@ -1,78 +1,23 @@
 Twenty
 ===
 
-### To build:
+### Intro
 
-Prerequisites (Unix only):
+This is a public repo built by the [Twenty](https://github.com/hr-twenty) team at [Hack Reactor](http://www.hackreactor.com/)
 
-    * GCC 4.2 or newer
-    * Python 2.6 or 2.7
-    * GNU Make 3.81 or newer
-    * libexecinfo (FreeBSD and OpenBSD only)
+### Twenty
 
-Unix/Macintosh:
+Twenty is a mobile app that allows you to quickly and easily connect with professionals in your area.  Whether it's to connect with other developers to discuss pointers on the newest libraries, to find VCs to invest in your latest venture, or simply to make the most out of your layover at SFO, Twenty is the app for converting your virtual networks into physical ones.
 
-    ./configure
-    make
-    make install
+Log in with LinkedIn to get started.  You'll see a stack of potential connections and simply swipe right to connect or swipe left to move on to the next one.  If both people swipe right, you'll get a notification and can immediately start chatting using our in-app messenger.
 
-With libicu i18n support:
 
-    svn checkout --force --revision 214189 \
-        http://src.chromium.org/svn/trunk/deps/third_party/icu46 \
-        deps/v8/third_party/icu46
-    ./configure --with-icu-path=deps/v8/third_party/icu46/icu.gyp
-    make
-    make install
+### Technical
 
-If your python binary is in a non-standard location or has a
-non-standard name, run the following instead:
+Twenty uses the following technologies:
+  - Angular/Ionic
+  - Node
+  - Express
+  - Neo4j
 
-    export PYTHON=/path/to/python
-    $PYTHON ./configure
-    make
-    make install
-
-Prerequisites (Windows only):
-
-    * Python 2.6 or 2.7
-    * Visual Studio 2010 or 2012
-
-Windows:
-
-    vcbuild nosign
-
-You can download pre-built binaries for various operating systems from
-[http://nodejs.org/download/](http://nodejs.org/download/).  The Windows
-and OS X installers will prompt you for the location to install to.
-The tarballs are self-contained; you can extract them to a local directory
-with:
-
-    tar xzf /path/to/node-<version>-<platform>-<arch>.tar.gz
-
-Or system-wide with:
-
-    cd /usr/local && tar --strip-components 1 -xzf \
-                         /path/to/node-<version>-<platform>-<arch>.tar.gz
-
-### To run the tests:
-
-Unix/Macintosh:
-
-    make test
-
-Windows:
-
-    vcbuild test
-
-### To build the documentation:
-
-    make doc
-
-### To read the documentation:
-
-    man doc/node.1
-
-Resources for Newcomers
----
-  - [The Website](https://github.com/joyent/node/wiki)
+This repo contains all code for both the Node/Express server and for the Neo4j database.
