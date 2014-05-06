@@ -5,107 +5,69 @@ var matchMaker = require('./matchmaker/matchmaker')();
 /*--------Stack Methods-----------*/
 exports.getStack = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]',
-    '->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     'WHERE type(r2) <> "REJECTED"',
-    'OPTIONAL MATCH (other)-[r3]->(otherInfo)',
+    'WITH other, r2',
+    'LIMIT 20',
+    'MATCH (other)-[r3]->(otherInfo)',
     'WHERE type(r3) <> "HAS_CONVERSATION"',
     'AND type(r3) <> "HAS_STACK"',
-    'AND type(r3) <> "STACK_USER"',
-    'AND type(r3) <> "APPROVED"',
-    'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData, type(r2) as otherToUserRel',
-    'ORDER BY type(r2)',
-    'LIMIT 10'
+    'AND type(r3) <> "BELONGS_TO"',
+    'RETURN DISTINCT other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData, type(r2) as otherToUserRel',
+    'ORDER BY type(r2)'
   ].join('\n');
-
 
   var params = {
     userId: data.userId
   };
 
-  db.query(query, params, function (err, results) {
+  db.query(query, params, function (err, stackResults) {
     if (err) return callback(err);
-    var finalResults = results.map(function(obj){
-      var updatedObj = {};
-      updatedObj.otherToUserRel = obj.otherToUserRel;
-      //get user data
-      for(var key in obj.other.data){
-        updatedObj[key] = obj.other.data[key];
-      }
-      //get all relationships
-      for(var i = 0; i < obj.relationships.length; i++){
-        updatedObj[obj.relationships[i]] = obj.otherNodeData[i].data;
-      }
-      return updatedObj;
-    });
-
-    if(results.length < 10){
-      clusterStack(data);
-    }
-
-    callback(null, finalResults);
-  });
-
-};
-
-//Add more users to this user's Stack based on cluster
-var clusterStack = function(data){
-  matchMaker.matches(data.userId, function(err, results){
-    if(results.length > 0){
-      results.forEach(function(obj){
-        addOneUserToStack(data.userId, obj.otherId);
+    //if there aren't enough users on the stack, get more users from the cluster
+    if(stackResults.length < 10){
+      matchMaker.matches(data.userId, function(err,clusterResults){
+        var finalResults = [];
+        finalResults=finalResults.concat(stackResults);
+        finalResults=finalResults.concat(clusterResults);
+        processResults(finalResults,callback);
       });
     } else {
-      addAllUsersToStack(data);
+    //otherwise, clean up the data and send it out
+      processResults(stackResults, callback);
     }
   });
 };
 
-//Add more users to this user's Stack if cluster isn't big enough
-var addAllUsersToStack = function(data){
-  var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
-    'WHERE user.userId <> other.userId',
-    'AND NOT (us)-->(other)',
-    'MERGE (us)-[:STACK_USER]-(other)',
-    'MERGE (os)-[:STACK_USER]-(user)',
-    'RETURN null'
-  ].join('\n');
-
-  var params = {
-    userId: data.userId
-  };
-
-  db.query(query, params, function (err) {
-    if (err) return (err);
+//Clean up the data from Neo4j before sending to the front end
+var processResults = function(results, callback){
+  var finalResults = results.map(function(obj){
+    var updatedObj = {};
+    updatedObj.otherToUserRel = (obj.otherToUserRel || 'STACK_USER');
+    //get user data and put it directly on the object
+    for(var key in obj.other.data){
+      updatedObj[key] = obj.other.data[key];
+    }
+    //for each relationship, create a key of the relationship type and a value of that relationship's data
+    for(var i = 0; i < obj.relationships.length; i++){
+      if(updatedObj[obj.relationships[i]]){
+        updatedObj[obj.relationships[i]].push(obj.otherNodeData[i].data);
+      } else {
+        updatedObj[obj.relationships[i]] = [obj.otherNodeData[i].data];
+      }
+    }
+    return updatedObj;
   });
+  callback(null, finalResults);
 };
 
-var addOneUserToStack = function(data){
-  var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User {userId:{otherId}})-[:HAS_STACK]->(os:Stack)',
-    'MERGE (us)-[:STACK_USER]->(other)',
-    'MERGE (os)-[:STACK_USER]->(user)',
-    'RETURN null'
-  ].join('\n');
-
-  var params = {
-    userId: data.userId,
-    otherId: data.otherId
-  };
-
-  db.query(query, params, function (err) {
-    if (err) return (err);
-  });
-};
-
+/*--------User Interaction with Stack Methods-----------*/
 exports.approve = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1:STACK_USER]->(other:User {userId:{otherId}})',
-    'OPTIONAL MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User {userId:{otherId}})',
     'DELETE r1',
-    'WITH r2, us, other',
-    'MERGE (us)-[r3:APPROVED]->(other)',
+    'WITH us, other, user',
+    'MATCH (other)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
+    'CREATE UNIQUE (us)-[:APPROVED]->(other)',
     'RETURN type(r2) as otherToUserRel'
   ].join('\n');
 
@@ -118,11 +80,13 @@ exports.approve = function (data, callback) {
     if (err) return callback(err);
     // if both parties have approved, create a conversation node
     if(results[0].otherToUserRel === 'APPROVED'){
-      
       var query2 = [
+        'CREATE (c:Conversation)-[:CONTAINS_MESSAGE]->(m:Message)',
+        'SET m.system = true',
+        'SET c.connectDate = "'+ new Date().getTime()+'"',
+        'WITH c',
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
-        'MERGE (user)-[:HAS_CONVERSATION]->(m:Conversation)<-[:HAS_CONVERSATION]-(other)',
-        'SET m.connectDate = timestamp()',
+        'CREATE UNIQUE (user)-[:HAS_CONVERSATION]->(c)<-[:HAS_CONVERSATION]-(other)',
         'RETURN null'
       ].join('\n');
 
@@ -135,6 +99,7 @@ exports.approve = function (data, callback) {
         callback(err, results2);
       });
     } else {
+    //otherwise, send back the results
       callback(err, results);
     }
 
@@ -143,16 +108,35 @@ exports.approve = function (data, callback) {
 
 exports.reject = function (data, callback) {
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1:STACK_USER]->(other:User {userId:{otherId}})',
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User {userId:{otherId}})',
     'DELETE r1',
     'WITH us, other',
-    'MERGE (us)-[:REJECTED]->(other)',
+    'CREATE UNIQUE (us)-[:REJECTED]->(other)',
     'RETURN null'
   ].join('\n');
 
   var params = {
     userId: data.userId,
     otherId: data.otherId
+  };
+
+  db.query(query, params, function (err, results) {
+    callback(err, results);
+  });
+};
+
+//reset all of the relationships I've created with other users on my stack
+exports.resetStack = function (data, callback) {
+  var query = [
+    'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User)',
+    'DELETE r1',
+    'WITH us, other',
+    'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
+    'RETURN null'
+  ].join('\n');
+
+  var params = {
+    userId: data.userId
   };
 
   db.query(query, params, function (err, results) {

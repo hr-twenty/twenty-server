@@ -4,36 +4,28 @@ var env = require('../../config/env')('test');
 var neo4j = require('neo4j');
 var db = new neo4j.GraphDatabase(env.databaseUri);
 
+var linkedinData = require('./linkedinData');
 
-describe('user', function(){
-  var linkedinData = {
-    userId: '1',
-    firstName:'Shane', 
-    lastName:'Keller', 
-    headline:'booya grandma!', 
-    picture:'url', 
-    numConnections:4, 
-    locationCity:'San Francisco', 
-    locationCountry:'USA',
-    industryName: 'Software',
-    curPositionTitle: 'Software Engineer',
-    curCompanyName: 'Hack Reactor',
-    curCompanyStartDate: '4-1-2014',
-    curCompanyEndDate: 'Present',
-    companySize: '1-49',
-    languageName: 'English',
-    languageProficiency: 'Native speaker',
-    skillName: 'Angular.JS',
-    schoolName: 'USC',
-    schoolFieldOfStudy: 'Economics',
-    schoolStartDate: '8-1-2005',
-    schoolEndDate: '5-1-2010'
-  };
+describe('User Model', function(){
+  
+  it('should error when trying to create a new user with bad data', function(done){
+    userModel.create({}, function(err){
+      expect(err).to.not.equal(null);
+      done();
+    });
+  });
 
-  describe('created user', function(done){
+  it('should create a new user in the database', function(done){
+    userModel.create(linkedinData, function(err, results){
+      expect(err).to.equal(null);
+      expect(results[0]).to.exist;
+      done();
+    });
+  });
+  
+  describe('using mock data', function(){
     beforeEach(function(done){
       userModel.create(linkedinData, function(err, result){
-
         done();
       });
     });
@@ -51,26 +43,6 @@ describe('user', function(){
       });
     });
 
-    it('should exist in the database', function(done){
-      db.query(
-        'MATCH (user:User {userId:{userId}}) RETURN user.userId',
-        {userId: linkedinData.userId}, 
-      function(err, result){
-        expect(err).to.equal(null);
-        expect(result.length).to.equal(1);
-        done();
-      });
-    });
-
-    it('should belong to a cluster', function(done){
-      db.query(
-        'MATCH (:User {userId:{userId}})-[BELONGS_TO]->(c:Cluster) RETURN id(c)',
-        {userId: linkedinData.userId}, 
-      function(err, result){
-        expect(result.length).to.equal(1);
-        done();
-      });
-    });
-
   });
+  
 });
