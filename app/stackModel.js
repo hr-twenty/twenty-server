@@ -82,7 +82,8 @@ exports.approve = function (data, callback) {
     if(results[0].otherToUserRel === 'APPROVED'){
       var query2 = [
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
-        'CREATE UNIQUE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
+        'WITH user, other',
+        'MERGE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
         'WITH c',
         'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
         'ON CREATE SET m.system = true',
