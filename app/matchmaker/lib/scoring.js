@@ -11,21 +11,20 @@
     ...
   }
 */
-var scoring = function(you, formula){
+var scoring = function (you, formula) {
   var total = 0;
-  for (var type in formula){
-    if (typeof you[type] === 'object'){
-      total += scoring(you[type], formula[type])
+  for (var type in formula ) {
+    if (typeof you[type] === 'object') {
+      total += scoring(you[type], formula[type]);
     } else {
-      var sign = you[type] ? 1 : -1;
-      total += sign * formula[type];
+      total += (you[type] ? 1 : -1) * formula[type];
     }
   }
   return total;
 };
 
-module.exports = function(){
-  return function(me, myFormula, you, yourFormula){
+module.exports = function () {
+  return function (me, myFormula, you, yourFormula) {
     return scoring(you, myFormula) + scoring(me, yourFormula);
   };
-}
+};

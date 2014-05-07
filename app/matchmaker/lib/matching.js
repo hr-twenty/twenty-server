@@ -1,6 +1,6 @@
 /* global module */
-module.exports = function(db){
-  return function(userId, callback){
+module.exports = function (db) {
+  return function (userId, callback) {
     var query = [
       //find out who users in my cluster have approved and find their cluster
       'MATCH (user:User {userId:{userId}})-[:BELONGS_TO]->(source:Cluster)<-[:BELONGS_TO]-(peer:User)-[:HAS_STACK]->(:Stack)-[:APRROVED]->(other:User)-[:BELONGS_TO]->(target:Cluster)',
@@ -32,8 +32,10 @@ module.exports = function(db){
       userId: userId
     };
 
-    db.query(query, params, function(err, results){
-      if (err) return callback(err);
+    db.query(query, params, function (err, results) {
+      if (err) {
+        return callback(err);
+      }
       var query = [
         'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
         'WHERE user.userId <> other.userId',
@@ -54,11 +56,13 @@ module.exports = function(db){
         userId: userId
       };
 
-      db.query(query, params, function(err, randomResults){
-        if (err) return callback(err);
+      db.query(query, params, function (err, randomResults) {
+        if (err) {
+          return callback(err);
+        }
         var finalResults = [];
-        finalResults=finalResults.concat(results);
-        finalResults=finalResults.concat(randomResults);
+        finalResults = finalResults.concat(results);
+        finalResults = finalResults.concat(randomResults);
         callback(err, finalResults);
       });
     });

@@ -1,5 +1,5 @@
 /* global module */
-var match = function(db, userId, callback){
+var match = function (db, userId, callback) {
   //find the cluster this user should be associated with
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_SKILL]->(:Skill)<-[:HAS_SKILL]-(peer:User)-[:BELONGS_TO]->(cluster:Cluster)',
@@ -13,7 +13,7 @@ var match = function(db, userId, callback){
   db.query(query, params, callback);
 };
 
-var createCluster = function(db, userId, callback){
+var createCluster = function (db, userId, callback) {
   //create a new cluster this user should be associated with
   var query = [
     'MATCH (user:User {userId:{userId}})',
@@ -28,7 +28,7 @@ var createCluster = function(db, userId, callback){
   db.query(query, params, callback);
 };
 
-var createRelation = function(db, userId, clusterId, callback){
+var createRelation = function (db, userId, clusterId, callback) {
   var query = [
     'START cluster=node({clusterId})',
     'MATCH (user:User {userId:{userId}})',
@@ -45,13 +45,13 @@ var createRelation = function(db, userId, clusterId, callback){
 };
 
 
-module.exports = function(db){
-  return function(userId, callback){
-    match(db, userId, function(err, results){
-      if (results.length === 0){
+module.exports = function (db) {
+  return function (userId, callback) {
+    match(db, userId, function (err, results) {
+      if (results.length === 0) {
         createCluster(db, userId, callback);
       } else {
-        createRelation(db, userId, results[0]['clusterId'], callback);
+        createRelation(db, userId, results[0].clusterId, callback);
       }
     });
 

@@ -1,6 +1,6 @@
 /* global require, module */
-module.exports = function(db){
-  var db = db || require('../db');
+module.exports = function (db) {
+  db = db || require('../db');
   return {
     /*
       function(id, callback)
@@ -28,6 +28,6 @@ module.exports = function(db){
           same structure as above but the value are weights
     */
     score: require('./lib/scoring')()
-  }
+  };
 };
 
