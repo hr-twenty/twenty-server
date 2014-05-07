@@ -1,6 +1,7 @@
 
 var neo4j = require('neo4j'),
-    db = new neo4j.GraphDatabase('http://twenty:32sWAeLkd1sBjy9yeB0v@twenty.sb01.stations.graphenedb.com:24789');
+    env = require('./env')(process.env.NODE_ENV),
+    db = new neo4j.GraphDatabase(env.databaseUri);
 
 module.exports = db;
 

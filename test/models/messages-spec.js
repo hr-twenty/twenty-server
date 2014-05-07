@@ -1,8 +1,9 @@
 
+process.env.NODE_ENV = 'test';
+
 var mocha = require('mocha'),
     expect = require('chai').expect;
     env = require('../../config/env')('test'),
-    db = require('../../config/neo4j'),
     Message = require('../../app/models/messages/');
 
 describe('Message model', function(){
@@ -41,48 +42,74 @@ describe('Message model', function(){
       });
     });
 
-    it('should return an error with only some of the valid params given', function(done) {
-      // var query = [
-      //   'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}}),',
-      //   '(other)-[:WORKS_FOR]->(company:Company)',
-      //   'WITH other, c, company',
-      //   'LIMIT 1',
-      //   'MATCH path=(c)-[*]->(m:Message)',
-      //   'WHERE m.time > {mostRecentMsg}',
-      //   'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages'
-      // ].join('\n');
+    // it('should return an error with only some of the valid params given', function(done) {
+    //   // var query = [
+    //   //   'MATCH (user:User {userId:{userId}})--(c:Conversation)--(other:User {userId:{otherId}}),',
+    //   //   '(other)-[:WORKS_FOR]->(company:Company)',
+    //   //   'WITH other, c, company',
+    //   //   'LIMIT 1',
+    //   //   'MATCH path=(c)-[*]->(m:Message)',
+    //   //   'WHERE m.time > {mostRecentMsg}',
+    //   //   'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages'
+    //   // ].join('\n');
+    //
+    //   var query = [
+    //     'MATCH (user { userId: {userId}})-[r1:HAS_CONVERSATION]->(conversation)-[r2]->(other)',
+    //     'WHERE type(r1)=type(r2)',
+    //     'AND other.userId = {otherId}',
+    //     'RETURN conversation'
+    //   ].join('\n');
+    //
+    //   var params = {
+    //     userId: '1'
+    //     // otherId: undefined,
+    //     // mostRecentMsg: 'hi'
+    //   };
+    //
+    //   db.query(query, function(err, results) {
+    //     console.log('err', err);
+    //     console.log('results', results);
+    //     expect(err).to.not.equal(null);
+    //     done();
+    //   });
+    //
+    //
+    //   // Message.getOne({
+    //   //   userId: 'a',
+    //   //   otherId: 'a',
+    //   //   mostRecentMsg: undefined
+    //   //   // no mostRecentMsg param
+    //   // }, function(err, messages) {
+    //   //   console.log('messages', messages);
+    //   //   expect(err).to.not.equal(null);
+    //   //   done();
+    //   // });
+    // });
 
-      var query = [
-        'MATCH (user { userId: {userId}})-[r1:HAS_CONVERSATION]->(conversation)-[r2]->(other)',
-        'WHERE type(r1)=type(r2)',
-        'AND other.userId = {otherId}',
-        'RETURN conversation'
-      ].join('\n');
-
-      var params = {
-        userId: '1'
-        // otherId: undefined,
-        // mostRecentMsg: 'hi'
-      };
-
-      db.query(query, function(err, results) {
-        console.log('err', err);
-        console.log('results', results);
+  });
+  
+  describe('send message (create)', function(){
+    
+    it('should return an error with invalid params', function(done) {
+      Message.sendMessage({
+        // no params given
+      }, function(err, messages) {
         expect(err).to.not.equal(null);
         done();
       });
+    });
 
-
-      // Message.getOne({
-      //   userId: 'a',
-      //   otherId: 'a',
-      //   mostRecentMsg: undefined
-      //   // no mostRecentMsg param
-      // }, function(err, messages) {
-      //   console.log('messages', messages);
-      //   expect(err).to.not.equal(null);
-      //   done();
-      // });
+    it('should return null as results on successful creation', function(done) {
+      Message.sendMessage({
+        userId: '1',
+        otherId: '2',
+        text: 'hello',
+        time: new Date().getTime()
+      }, function(err, messages) {
+        expect(err).to.equal(null);
+        expect(Array.isArray(messages)).to.be.true;
+        done();
+      });
     });
 
   });

@@ -16,6 +16,10 @@ exports.getAll = function(data, callback){
   var params = {
     userId: data.userId
   };
+  
+  // Make sure correct params exist
+  if (!params.userId)
+    return callback(new Error('Missing valid params to query'));
 
   db.query(query, params, function (err, results) {
     if (err){return callback(err);}
@@ -40,6 +44,10 @@ exports.getOne = function(data, callback){
     otherId: data.otherId,
     mostRecentMsg: data.mostRecentMsg
   };
+
+  // Make sure correct params exist
+  if (!params.userId || !params.otherId || !params.mostRecentMsg)
+    return callback(new Error('Missing valid params to query'));
 
   db.query(query, params, function (err, results) {
     if (err){callback(err);}
@@ -90,6 +98,10 @@ exports.sendMessage = function(data, callback){
     text: data.text,
     time: data.time
   };
+
+  // Make sure correct params exist
+  if (!params.userId || !params.otherId || !params.text || !params.time)
+    return callback(new Error('Missing valid params to query'));
 
   db.query(query, params, function (err, results) {
     callback(err, results);
