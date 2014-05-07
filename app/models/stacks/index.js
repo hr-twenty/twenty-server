@@ -1,6 +1,6 @@
 /* global require, exports */
-var db = require('./db');
-var matchMaker = require('./matchmaker/matchmaker')();
+var db = require('../../../config/neo4j'),
+    matchMaker = require('../../matchmaker/matchmaker')();
 
 /*--------Stack Methods-----------*/
 exports.getStack = function (data, callback) {

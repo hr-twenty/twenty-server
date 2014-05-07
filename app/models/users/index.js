@@ -1,7 +1,7 @@
 /* global require, exports */
-var db = require('./db');
-var queryHelpers = require('./queryHelpers');
-var matchMaker = require('./matchmaker/matchmaker')();
+var db = require('../../../config/neo4j'),
+    queryHelpers = require('../queryHelpers'),
+    matchMaker = require('../../matchmaker/matchmaker')();
 
 /*--------User Methods-----------*/
 exports.create = function (linkedInData, callback) {

@@ -1,6 +1,9 @@
-var userModel = require('../../app/userModel');
-var expect = require('chai').expect;
-var db = require('../../app/db')
+
+process.env.NODE_ENV = 'test';
+
+var expect = require('chai').expect,
+    env = require('../../config/env')('test'),
+    User = require('../../app/models/users/');
 
 describe('User Model', function(){
   var linkedinData = {'educations': {'values': [

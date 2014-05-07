@@ -1,8 +1,7 @@
 
 process.env.NODE_ENV = 'test';
 
-var mocha = require('mocha'),
-    expect = require('chai').expect;
+var expect = require('chai').expect,
     env = require('../../config/env')('test'),
     Message = require('../../app/models/messages/');
 
