@@ -1,6 +1,5 @@
 /* global require, exports */
-var User = require('../userModel'),
-    helper = require('./helper');
+var User = require('../models/users');
 
 // POST /user
 exports.create = function(req, res){

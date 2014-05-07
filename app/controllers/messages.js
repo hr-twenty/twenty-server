@@ -1,6 +1,5 @@
 /* global require, exports */
-var Message = require('../messageModel'),
-    helper = require('./helper');
+var Message = require('../models/messages/');
 
 // GET /conversations/all
 // exports.getAllConversations

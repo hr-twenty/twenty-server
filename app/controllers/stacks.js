@@ -1,7 +1,5 @@
 /* global require, exports */
-var Stack = require('../stackModel'),
-    helper = require('./helper');
-
+var Stack = require('../models/stacks/');
 
 // GET /userStack
 exports.show = function(req, res){
