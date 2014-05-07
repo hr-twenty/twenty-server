@@ -42,7 +42,7 @@ module.exports = function(app, passport) {
   app.get('/auth/linkedin/callback',
     passport.authenticate('linkedin', { failureRedirect: '/login' }),
     function(req, res) {
-      res.json({ userId: req.user.id });
+      res.redirect('/?userId=' + req.user.id);
     }
   );
 
