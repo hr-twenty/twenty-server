@@ -1,7 +1,7 @@
-var _ = require('lodash'),
-    LinkedInStrategy = require('passport-linkedin-oauth2').Strategy,
-    linkedin = require('./linkedin'),
-    User = require('../app/userModel');
+var _ = require('lodash');
+var LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
+var linkedin = require('./linkedin');
+var User = require('../app/userModel');
 
 
 module.exports = function(app, passport, ip, port) {
@@ -43,7 +43,7 @@ module.exports = function(app, passport, ip, port) {
       firstName: 'Not Entered',
       lastName: 'Not Entered',
       headline: 'Not Entered',
-      pictureUrl: 'Not Entered',
+      pictureUrl: 'http://static2.businessinsider.com/image/509802cb69bedd6209000009/nicolas-cage-will-be-in-the-expendables-3.jpg',
       numConnections: 'Not Entered',
       industry: 'Not Entered'
     };

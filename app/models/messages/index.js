@@ -9,8 +9,10 @@ exports.getAll = function(data, callback){
     'WITH user',
     'MATCH (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other:User)',
     'WITH c, other',
+    'MATCH (other)-[:WORKS_FOR]->(company:Company)',
+    'WITH c, other, company',
     'MATCH path=(c)-[*]->(m:Message)',
-    'RETURN other, collect(m) as messages, c.connectDate as connectDate'
+    'RETURN other, collect(m) as messages, c.connectDate as connectDate, collect(company) as company'
   ].join('\n');
 
   var params = {
@@ -35,7 +37,7 @@ exports.getOne = function(data, callback){
     'LIMIT 1',
     'MATCH path=(c)-[*]->(m:Message)',
     'WHERE m.time > {mostRecentMsg}',
-    'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages'
+    'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages, company'
   ].join('\n');
 
   // need to check for missing params due to bug in node-neo4j
@@ -64,7 +66,7 @@ var processMessages = function(userId, results, callback){
       firstName: obj.other.data.firstName,
       lastName: obj.other.data.lastName,
       picture: obj.other.data.picture,
-      WORKS_FOR: obj.company,
+      WORKS_FOR: obj.company[0].data,
       lastActive: obj.other.data.lastActive
     };
     obj.connectDate = obj.connectDate;

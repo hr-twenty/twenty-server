@@ -21,16 +21,19 @@ exports.getStack = function (data, callback) {
     userId: data.userId
   };
 
-  db.query(query, params, function (err, results) {
+  db.query(query, params, function (err, stackResults) {
     if (err) return callback(err);
     //if there aren't enough users on the stack, get more users from the cluster
-    if(results.length < 10){
-      matchMaker.matches(data.userId, function(err,results){
-        processResults(results,callback);
+    if(stackResults.length < 10){
+      matchMaker.matches(data.userId, function(err,clusterResults){
+        var finalResults = [];
+        finalResults=finalResults.concat(stackResults);
+        finalResults=finalResults.concat(clusterResults);
+        processResults(finalResults,callback);
       });
     } else {
     //otherwise, clean up the data and send it out
-      processResults(results, callback);
+      processResults(stackResults, callback);
     }
   });
 };
@@ -76,15 +79,15 @@ exports.approve = function (data, callback) {
   db.query(query, params, function (err, results) {
     if (err) return callback(err);
     // if both parties have approved, create a conversation node
-    console.log('approved!', results)
     if(results[0].otherToUserRel === 'APPROVED'){
       var query2 = [
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
-        'CREATE UNIQUE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
+        'WITH user, other',
+        'MERGE (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other)',
         'WITH c',
-        'CREATE UNIQUE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
-        'SET m.system = true',
-        'SET c.connectDate = "'+ new Date().getTime()+'"',
+        'MERGE (c)-[:CONTAINS_MESSAGE]->(m:Message)',
+        'ON CREATE SET m.system = true',
+        'ON CREATE SET c.connectDate = "'+ new Date().getTime()+'"',
         'RETURN null'
       ].join('\n');
 

@@ -11,19 +11,21 @@ module.exports = function(db){
       'WITH user, target',
       'LIMIT 5',
       //find the users on the target cluster that aren't already on my stack and add them
-      'MATCH (target)<-[:BELONGS_TO]-(targetOther:User), (user)-[:HAS_STACK]->(us:Stack), (targetOther:User)-[:HAS_STACK]->(os:Stack)',
-      'WHERE (user)-[:LIVES_IN]->(:Location)<-[:LIVES_IN]-(targetOther)',
-      'AND NOT (us)-->(targetOther)',
+      'MATCH (target)<-[:BELONGS_TO]-(targetOther:User)-[:LIVES_IN]->(:Location)<-[:LIVES_IN]-(user)',
+      'WITH user, targetOther',
+      'LIMIT 10',
+      'MATCH (user)-[:HAS_STACK]->(us:Stack), (targetOther:User)-[:HAS_STACK]->(os:Stack)',
+      'WHERE NOT (us)-->(targetOther)',
       'CREATE UNIQUE (us)-[:STACK_USER]->(targetOther)',
       'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
       'WITH targetOther',
-      'LIMIT 10',
       //find the information about the targetOther user to return to the front end
       'MATCH (targetOther)-[r3]->(otherInfo)',
       'WHERE type(r3) <> "HAS_CONVERSATION"',
       'AND type(r3) <> "HAS_STACK"',
       'AND type(r3) <> "BELONGS_TO"',
-      'RETURN targetOther, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData'
+      'RETURN targetOther, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData',
+      'LIMIT 10'
     ].join('\n');
 
     var params = {
@@ -32,15 +34,15 @@ module.exports = function(db){
 
     db.query(query, params, function(err, results){
       if (err) return callback(err);
-
       var query = [
         'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
         'WHERE user.userId <> other.userId',
         'AND NOT (us)-->(other)',
+        'WITH user, other, us, os',
+        'LIMIT 10',
         'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
         'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
         'WITH other',
-        'LIMIT 10',
         'MATCH (other)-[r3]->(otherInfo)',
         'WHERE type(r3) <> "HAS_CONVERSATION"',
         'AND type(r3) <> "HAS_STACK"',
