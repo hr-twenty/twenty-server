@@ -1,6 +1,7 @@
 
-var mocha = require('mocha'),
-    should = require('should'),
+process.env.NODE_ENV = 'test';
+
+var should = require('should'),
     request = require('request'),
     express = require('express'),
     passport = require('passport'),
@@ -8,8 +9,7 @@ var mocha = require('mocha'),
     app = express();
 
 
-describe('messages api', function() {
-  this.timeout(5000);
+describe('Messages api', function() {
 
   var server,
       host = 'http://' + env.ip + ':' + env.port;
@@ -27,10 +27,11 @@ describe('messages api', function() {
     done();
   });
 
-  describe('index action', function() {
+  describe('index action (/conversations/all)', function() {
     it('should respond with 400 when missing a userId', function(done) {
       request.get(host + '/conversations/all', function(err, res) {
         res.statusCode.should.equal(400);
+        done();
       });
     });
 
@@ -55,10 +56,11 @@ describe('messages api', function() {
     // });
   });
 
-  describe('show action', function() {
-    it('should respond with 400 when missing a userId, otherId, text and time', function(err, res) {
+  describe('show action (/conversations/one)', function() {
+    it('should respond with 400 when missing a userId, otherId, text and time', function(done) {
       request.get(host + '/conversations/one', function(err, res) {
         res.statusCode.should.equal(400);
+        done();
       });
     });
 

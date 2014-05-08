@@ -1,6 +1,7 @@
 
-var mocha = require('mocha'),
-    should = require('should'),
+process.env.NODE_ENV = 'test';
+
+var should = require('should'),
     request = require('request'),
     express = require('express'),
     passport = require('passport'),
@@ -9,7 +10,6 @@ var mocha = require('mocha'),
 
 
 describe('users api', function() {
-  this.timeout(5000);
 
   var server,
       host = 'http://' + env.ip + ':' + env.port;
@@ -39,9 +39,23 @@ describe('users api', function() {
   describe('create action', function() {
     it('should respond with 201 on success', function(done) {
       request.post({
-        url: host + '/users',
+        url: host + '/user',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify([{}])
+        body: JSON.stringify({
+          id: '911',
+          firstName: 'Peter',
+          lastName: 'Parker',
+          headline: 'swingin...',
+          pictureUrl: 'nil',
+          numConnections: '1',
+          industry: 'crawling',
+          location: {
+            name: 'New York City',
+            country: {
+              code: 'US'
+            }
+          }
+        })
       }, function(err, res) {
         res.statusCode.should.equal(201);
         done();
@@ -51,36 +65,36 @@ describe('users api', function() {
 
   describe('show action', function() {
     it('should respond with 200 on success', function(done) {
-      request.get(host + '/users/1', function(err, res) {
+      request.get(host + '/user?userId=1', function(err, res) {
         res.statusCode.should.equal(200);
         done();
       });
     });
   });
 
-  describe('update action', function() {
-    it('should respond with 204 on success', function(done) {
-      request.put({
-        url: host + '/users/1',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify([{}])
-      }, function(err, res) {
-        res.statusCode.should.equal(204);
-        done();
-      })
-    });
-  });
+  // describe('update action', function() {
+  //   it('should respond with 204 on success', function(done) {
+  //     request.put({
+  //       url: host + '/user/1',
+  //       headers: { 'content-type': 'application/json' },
+  //       body: JSON.stringify([{}])
+  //     }, function(err, res) {
+  //       res.statusCode.should.equal(204);
+  //       done();
+  //     })
+  //   });
+  // });
 
-  describe('destroy action', function() {
-    it('should respond with 204 on success', function(done) {
-      request.del({
-        url: host + '/users/1',
-        headers: { 'content-type': 'application/json' }
-      }, function(err, res) {
-        res.statusCode.should.equal(204);
-        done();
-      });
-    });
-  });
+  // describe('destroy action', function() {
+  //   it('should respond with 204 on success', function(done) {
+  //     request.del({
+  //       url: host + '/user?userId=1',
+  //       headers: { 'content-type': 'application/json' }
+  //     }, function(err, res) {
+  //       res.statusCode.should.equal(204);
+  //       done();
+  //     });
+  //   });
+  // });
 
 });

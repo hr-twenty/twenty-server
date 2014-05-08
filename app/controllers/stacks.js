@@ -1,5 +1,6 @@
 /* global require, exports */
-var Stack = require('../models/stacks/');
+var Stack = require('../models/stacks/'),
+    helper = require('./helpers');
 
 // GET /userStack
 exports.show = function(req, res){
@@ -10,6 +11,6 @@ exports.show = function(req, res){
 // POST /userStack/:action
 exports.create = function(req, res){
   var stackData = req.body;
-  Stack[req.param.action](stackData, helper.respond(res, 400, 201));
+  Stack[req.params.action](stackData, helper.respond(res, 400, 201));
 };
 

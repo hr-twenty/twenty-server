@@ -1,6 +1,7 @@
 
-var mocha = require('mocha'),
-    should = require('should'),
+process.env.NODE_ENV = 'test';
+
+var should = require('should'),
     request = require('request'),
     express = require('express'),
     passport = require('passport'),
@@ -9,7 +10,6 @@ var mocha = require('mocha'),
 
 
 describe('stacks api', function() {
-  this.timeout(5000);
 
   var server,
       host = 'http://' + env.ip + ':' + env.port;
@@ -29,7 +29,7 @@ describe('stacks api', function() {
 
   describe('index action', function() {
     it('should respond with 200 on success', function(done) {
-      request.get(host + '/userStack', function(err, res) {
+      request.get(host + '/userStack?userId=1', function(err, res) {
         res.statusCode.should.equal(200);
         done();
       });
@@ -39,9 +39,12 @@ describe('stacks api', function() {
   describe('create (approve) action', function() {
     it('should respond with 201 on success', function(done) {
       request.post({
-        url: host + '/userStacks/approve',
+        url: host + '/userStack/approve',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify([{}])
+        body: JSON.stringify({
+          userId: '1',
+          otherId: '2'
+        })
       }, function(err, res) {
         res.statusCode.should.equal(201);
         done();
@@ -52,9 +55,12 @@ describe('stacks api', function() {
   describe('create (reject) action', function() {
     it('should respond with 201 on success', function(done) {
       request.post({
-        url: host + '/userStacks/reject',
+        url: host + '/userStack/reject',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify([{}])
+        body: JSON.stringify({
+          userId: '1',
+          otherId: '2'
+        })
       }, function(err, res) {
         res.statusCode.should.equal(201);
         done();
@@ -65,9 +71,11 @@ describe('stacks api', function() {
   describe('create (reset) action', function() {
     it('should respond with 201 on success', function(done) {
       request.post({
-        url: host + '/userStacks/reset',
+        url: host + '/userStack/resetStack',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify([{}])
+        body: JSON.stringify({
+          userId: '1'
+        })
       }, function(err, res) {
         res.statusCode.should.equal(201);
         done();

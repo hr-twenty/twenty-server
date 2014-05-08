@@ -8,8 +8,8 @@ module.exports = function(app, passport) {
   // app.use('/user', passport.authorize('linkedin', { failureRedirect: '/login' }))
   app.get('/user', users.show);
   app.post('/user', users.create);
-  app.put('/user', users.update);
-  app.del('/user', users.destroy);
+  // app.put('/user', users.update);
+  // app.del('/user', users.destroy);
 
   //UserStack
   // app.use('/userStack', passport.authorize('linkedin', { failureRedirect: '/login' }))
