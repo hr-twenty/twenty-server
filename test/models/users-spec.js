@@ -3,9 +3,36 @@ process.env.NODE_ENV = 'test';
 
 var expect = require('chai').expect,
     env = require('../../config/env')('test'),
-    User = require('../../app/models/users/');
+    User = require('../../app/models/users/'),
+    db = require('../../config/neo4j');
 
 describe('User Model', function(){
+  this.timeout(5000);
+
+  // describe('using mock data', function() {
+  //
+  //   var linkedinData = require('./linkedinData');
+  //
+  //   beforeEach(function(done) {
+  //     User.create(linkedinData, function(err, users) {
+  //       done();
+  //     });
+  //   });
+  //
+  //   afterEach(function(done){
+  //     userModel.del(linkedinData, function(err){
+  //       expect(err).to.equal(null);
+  //       db.query(
+  //         'MATCH (user:User {userId:{userId}}) RETURN user.userId',
+  //         {userId: linkedinData.userId}, 
+  //       function(err, result){
+  //         expect(result.length).to.equal(0);
+  //         done();
+  //       });
+  //     });
+  //   });
+  //
+  // });
 
   describe('get', function() {
 

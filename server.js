@@ -12,7 +12,7 @@ function bootstrap(ip, port, envType) {
   require('./config/passport')(app, passport, ip, port);
   require('./config/routes')(app, passport);
 
-  var server = app.listen(app.get('port'), function() {
+  var server = app.listen(port, function() {
     console.log('Server listening at %s on port %d in %s environment...', ip, port, envType);
   });
 

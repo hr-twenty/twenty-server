@@ -6,6 +6,7 @@ var expect = require('chai').expect,
     Message = require('../../app/models/messages/');
 
 describe('Message model', function(){
+  this.timeout(5000);
 
   describe('get all messages', function(){
     

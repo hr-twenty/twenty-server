@@ -17,6 +17,7 @@
     "body-parser": "^1.0.2",
     "express": "^4.0.0",
     "morgan": "^1.0.0",
+    "node-neo4j": "^2.0.0-RC6",
     "passport": "^0.2.0",
     "passport-linkedin-oauth2": "^1.1.1",
     "cookie-parser": "^1.0.1",

@@ -28,6 +28,6 @@ module.exports = function(db){
           same structure as above but the value are weights
     */
     score: require('./lib/scoring')()
-  }
+  };
 };
 

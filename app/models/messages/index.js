@@ -22,8 +22,8 @@ exports.getAll = function(data, callback) {
     return callback(new Error('Missing valid params to query'));
 
   db.query(query, params, function (err, results) {
-    if (err){return callback(err);}
-    else {processMessages(data.userId, results, callback);}
+    if (err) { return callback(err); }
+    else { processMessages(data.userId, results, callback); }
   });
 };
 

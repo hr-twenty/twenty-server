@@ -1,6 +1,6 @@
 module.exports = {
   envType: 'production',
-  databaseUri: 'http://twenty:32sWAeLkd1sBjy9yeB0v@twenty.sb01.stations.graphenedb.com:24789',
-  ip: '65.52.118.73',
+  databaseUri: 'http://191.236.82.12:7474',
+  ip: '191.236.102.40',
   port: 55555
 } 

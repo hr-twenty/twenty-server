@@ -3,9 +3,32 @@ process.env.NODE_ENV = 'test';
 
 var expect = require('chai').expect,
     env = require('../../config/env')('test'),
-    Stack = require('../../app/models/stacks/');
+    Stack = require('../../app/models/stacks/'),
+    User = require('../../app/models/users/'),
+    db = require('../../config/neo4j');
 
 describe('Stack model', function() {
+  this.timeout(5000);
+
+  // describe('stack', function(){
+  //   var mockData = require('./mockData')();
+  //
+  //   beforeEach(function(done){
+  //     var counter = data.length;
+  //     data.forEach(function(value){
+  //       userModel.create(value, function(err, result){
+  //         counter++;
+  //         if (counter === data.length){
+  //           done();
+  //         }
+  //       });
+  //     });
+  //   });
+  //
+  //   afterEach(function(done){
+  //     db.query('MATCH (a), ()-[r]-() DELETE a, r', {}, done)
+  //   });
+  // });
 
   describe('get', function() {
     
