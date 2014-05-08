@@ -5,7 +5,7 @@ var should = require('should'),
     request = require('request'),
     express = require('express'),
     passport = require('passport'),
-    env = require('../../config/env')('test'),
+    env = require('../../env')('test'),
     app = express();
 
 

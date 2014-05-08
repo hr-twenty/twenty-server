@@ -2,7 +2,7 @@
 process.env.NODE_ENV = 'test';
 
 var expect = require('chai').expect,
-    env = require('../../config/env')('test'),
+    env = require('../../env')('test'),
     User = require('../../app/models/users/'),
     db = require('../../config/neo4j');
 

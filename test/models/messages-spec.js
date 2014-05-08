@@ -2,7 +2,7 @@
 process.env.NODE_ENV = 'test';
 
 var expect = require('chai').expect,
-    env = require('../../config/env')('test'),
+    env = require('../../env')('test'),
     Message = require('../../app/models/messages/');
 
 describe('Message model', function(){
