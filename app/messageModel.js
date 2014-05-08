@@ -50,6 +50,10 @@ exports.getOneConversation = function(data, callback){
 
 //Clean up the data from Neo4j before sending to the front end
 var processMessages = function(userId, results, callback){
+  var companyHelper = function(company){
+    if(company){return company[0].data;}
+    else{return 'Not Entered';}
+  };
   var finalResults = results.map(function(obj){
     obj.user = userId;
     obj.other = {
@@ -57,7 +61,7 @@ var processMessages = function(userId, results, callback){
       firstName: obj.other.data.firstName,
       lastName: obj.other.data.lastName,
       picture: obj.other.data.picture,
-      WORKS_FOR: (obj.company[0].data || 'Not Entered'),
+      WORKS_FOR: companyHelper(obj.company),
       lastActive: obj.other.data.lastActive
     };
     obj.connectDate = obj.connectDate;
