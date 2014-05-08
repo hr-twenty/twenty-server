@@ -6,7 +6,8 @@ var db = require('../../../config/neo4j'),
 exports.getStack = function (data, callback) {
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
-    'WHERE type(r2) <> "REJECTED"',
+    //Removed this line initially to increase users on stack
+    // 'WHERE type(r2) <> "REJECTED"',
     'WITH other, r2',
     'LIMIT 20',
     'MATCH (other)-[r3]->(otherInfo)',
