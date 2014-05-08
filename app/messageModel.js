@@ -57,7 +57,7 @@ var processMessages = function(userId, results, callback){
       firstName: obj.other.data.firstName,
       lastName: obj.other.data.lastName,
       picture: obj.other.data.picture,
-      WORKS_FOR: obj.company[0].data,
+      WORKS_FOR: (obj.company[0].data || 'Not Entered'),
       lastActive: obj.other.data.lastActive
     };
     obj.connectDate = obj.connectDate;
