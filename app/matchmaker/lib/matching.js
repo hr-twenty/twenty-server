@@ -1,40 +1,70 @@
 /* global module */
-module.exports = function(db){
-  return function(userId, callback){
+module.exports = function (db) {
+  return function (userId, callback) {
     var query = [
-      //users in my own cluster
-      'MATCH (user:User {userId:{userId}})-[:BELONGS_TO]->(source:Cluster)<-[:BELONGS_TO]-(other:User)',
-      'WHERE (user)-[:LIVES_IN]->(:Location)<-[:LIVES_IN]-(other)',
-      'RETURN DISTINCT other.userId as other',
-      'UNION',
-      //users in my cluster-mates's preferred cluster
-      'MATCH (user:User {userId:{userId}})-[:BELONGS_TO]->(source:Cluster)<-[:BELONGS_TO]-(peer:User),',
-      '(peer)-->(:Stack)-[:APRROVED]->(other:User)-[:BELONGS_TO]->(target:Cluster)',
+      //find out who users in my cluster have approved and find their cluster
+      'MATCH (user:User {userId:{userId}})-[:BELONGS_TO]->(source:Cluster)<-[:BELONGS_TO]-(peer:User)-[:HAS_STACK]->(:Stack)-[:APRROVED]->(other:User)-[:BELONGS_TO]->(target:Cluster)',
+      'WHERE user.userId <> peer.userId',
+      'AND user.userId <> other.userId',
+      'AND peer.userId <> other.userId',
+      'AND id(source) <> id(target)',
       'WITH user, target',
-      'MATCH (target)<-[:BELONGS_TO]-(other2:User)',
-      'WHERE (user)-[:LIVES_IN]->(:Location)<-[:LIVES_IN]-(other2)',
-      'AND NOT (user)-[:HAS_STACK]->(:Stack)-[:APRROVED]->(other2)',
-      'AND NOT (user)-[:HAS_STACK]->(:Stack)-[:REJECTED]->(other2)',
-      'RETURN DISTINCT other2.userId as other',
-    ].join(' ');
+      'LIMIT 5',
+      //find the users on the target cluster that aren't already on my stack and add them
+      'MATCH (target)<-[:BELONGS_TO]-(targetOther:User)-[:LIVES_IN]->(:Location)<-[:LIVES_IN]-(user)',
+      'WITH user, targetOther',
+      'LIMIT 10',
+      'MATCH (user)-[:HAS_STACK]->(us:Stack), (targetOther:User)-[:HAS_STACK]->(os:Stack)',
+      'WHERE NOT (us)-->(targetOther)',
+      'CREATE UNIQUE (us)-[:STACK_USER]->(targetOther)',
+      'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
+      'WITH targetOther',
+      //find the information about the targetOther user to return to the front end
+      'MATCH (targetOther)-[r3]->(otherInfo)',
+      'WHERE type(r3) <> "HAS_CONVERSATION"',
+      'AND type(r3) <> "HAS_STACK"',
+      'AND type(r3) <> "BELONGS_TO"',
+      'RETURN targetOther, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData',
+      'LIMIT 10'
+    ].join('\n');
 
     var params = {
       userId: userId
     };
 
-    db.query(query, params, function(err, results){
-      console.log(err)
-      
-      if (err) return callback(err);
-      var finalResults = results.map(function(obj){
-        return {
-          userId: obj.other.data.otherId
-        };
-      });
-      console.log(results)
-      console.log(finalResults)
+    db.query(query, params, function (err, results) {
+      if (err) {
+        return callback(err);
+      }
+      var query = [
+        'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack), (other:User)-[:HAS_STACK]->(os:Stack)',
+        'WHERE user.userId <> other.userId',
+        'AND NOT (us)-->(other)',
+        'WITH user, other, us, os',
+        'LIMIT 10',
+        'CREATE UNIQUE (us)-[:STACK_USER]->(other)',
+        'CREATE UNIQUE (os)-[:STACK_USER]->(user)',
+        'WITH other',
+        'MATCH (other)-[r3]->(otherInfo)',
+        'WHERE type(r3) <> "HAS_CONVERSATION"',
+        'AND type(r3) <> "HAS_STACK"',
+        'AND type(r3) <> "BELONGS_TO"',
+        'RETURN other, collect(type(r3)) as relationships, collect(otherInfo) as otherNodeData'
+      ].join('\n');
 
-      callback(null, finalResults);
+      var params = {
+        userId: userId
+      };
+
+      db.query(query, params, function (err, randomResults) {
+        if (err) {
+          return callback(err);
+        }
+        var finalResults = [];
+        finalResults = finalResults.concat(results);
+        finalResults = finalResults.concat(randomResults);
+        callback(err, finalResults);
+      });
     });
   };
 };

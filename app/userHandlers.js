@@ -5,6 +5,7 @@ var generalResponse = function(res){
 
   return function(err, data){
     if(err){
+      console.log(err);
       res.send(500, err);
     } else {
       res.send(200, data);

@@ -1,10 +1,9 @@
 /* global module */
-var match = function(db, userId, callback){
+var match = function (db, userId, callback) {
   //find the cluster this user should be associated with
   var query = [
-    'MATCH (user:User {userId:{userId}})-[:HAS_SKILL]->(:Skill)',
-    '<-[:HAS_SKILL]-(peer:User)-[:BELONGS_TO]->(cluster:Cluster)',
-    'RETURN id(cluster), count(peer) ORDER BY count(peer) DESC'
+    'MATCH (user:User {userId:{userId}})-[:HAS_SKILL]->(:Skill)<-[:HAS_SKILL]-(peer:User)-[:BELONGS_TO]->(cluster:Cluster)',
+    'RETURN id(cluster) as clusterId, count(peer) ORDER BY count(peer) DESC'
   ].join(' \n');
 
   var params = {
@@ -14,12 +13,12 @@ var match = function(db, userId, callback){
   db.query(query, params, callback);
 };
 
-var create = function(db, userId, callback){
+var createCluster = function (db, userId, callback) {
   //create a new cluster this user should be associated with
   var query = [
-    'MERGE (user:User {userId:{userId}})',
+    'MATCH (user:User {userId:{userId}})',
     'CREATE UNIQUE (user)-[:BELONGS_TO]->(cluster:Cluster)',
-    'RETURN id(cluster)'
+    'RETURN null'
   ].join('\n');
 
   var params = {
@@ -29,29 +28,30 @@ var create = function(db, userId, callback){
   db.query(query, params, callback);
 };
 
-var createRelation = function(userId, clusterId, callback){
+var createRelation = function (db, userId, clusterId, callback) {
   var query = [
     'START cluster=node({clusterId})',
-    'MERGE (user:User {userId:{userId}})-[:BELONGS_TO]->(cluster)',
-    'RETURN id(cluster)'
+    'MATCH (user:User {userId:{userId}})',
+    'CREATE UNIQUE (user)-[:BELONGS_TO]->(cluster)',
+    'RETURN null'
   ].join(' ');
 
   var params = {
-    userId: userId
+    userId: userId,
     clusterId: clusterId
   };
 
   db.query(query, params, callback);
-}
+};
 
 
-module.exports = function(db){
-  return function(userId, callback){
-    match(db, userId, function(err, results){
-      if (results.length === 0){
-        createCluster(db, id, callback(id))
+module.exports = function (db) {
+  return function (userId, callback) {
+    match(db, userId, function (err, results) {
+      if (results.length === 0) {
+        createCluster(db, userId, callback);
       } else {
-        createRelation(id, results[0][0], callback)
+        createRelation(db, userId, results[0].clusterId, callback);
       }
     });
 
