@@ -33,3 +33,14 @@ $ neo4j start
 $ mocha test/controllers
 $ mocha test/models
 ```
+
+### Environments
+1. production
+  server: 191.236.102.40
+  db: http://191.236.82.12:7474
+2. development --> localhost (will resolve to your computer's ip)
+  server: localhost (express will inform your computer's ip so that others can connect to your server)
+  db: http://twenty:32sWAeLkd1sBjy9yeB0v@twenty.sb01.stations.graphenedb.com:24789
+3. test
+  server: localhost
+  db: localhost:7474 (<code>neo4j start</code> to run neo4j locally)
