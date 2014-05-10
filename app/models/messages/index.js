@@ -10,7 +10,9 @@ exports.getAll = function(data, callback) {
     'MATCH (user)-[:HAS_CONVERSATION]->(c:Conversation)<-[:HAS_CONVERSATION]-(other:User)',
     'WITH c, other',
     'MATCH path=(c)-[*]->(m:Message)',
-    'RETURN other, collect(m) as messages, c.connectDate as connectDate'
+    'WITH other, m, c',
+    'MATCH (other)-[:WORKS_FOR]->(company:Company)',
+    'RETURN other, collect(m) as messages, c.connectDate as connectDate, company'
   ].join('\n');
 
   var params = {
