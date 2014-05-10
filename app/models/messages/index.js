@@ -35,7 +35,7 @@ exports.getOne = function(data, callback){
     'LIMIT 1',
     'MATCH path=(c)-[*]->(m:Message)',
     'WHERE m.time > {mostRecentMsg}',
-    'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages'
+    'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages, company'
   ].join('\n');
 
   // need to check for missing params due to bug in node-neo4j
