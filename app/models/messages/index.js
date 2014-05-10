@@ -60,12 +60,11 @@ exports.getOne = function(data, callback){
 //Clean up the data from Neo4j before sending to the front end
 var processMessages = function(userId, results, callback){
   var companyHelper = function(company){
+    console.log(company)
     if(company.data){
-      console.log(company.data)
       return [company.data[0]];}
     else{
       console.log('na')
-
       return 'Not Entered';}
   };
   var finalResults = results.map(function(obj){
