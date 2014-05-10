@@ -4,6 +4,8 @@ var db = require('../../../config/neo4j'),
 
 /*--------Stack Methods-----------*/
 exports.getStack = function (data, callback) {
+  console.log('!!!!!!!!!!!!!! getstack data', data);
+
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     //Removed this line initially to increase users on stack
