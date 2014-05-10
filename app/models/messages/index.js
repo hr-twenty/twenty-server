@@ -60,7 +60,7 @@ exports.getOne = function(data, callback){
 //Clean up the data from Neo4j before sending to the front end
 var processMessages = function(userId, results, callback){
   var companyHelper = function(company){
-    console.log(company)
+    console.log('first',company.data)
     if(company.data){
       return [company.data[0]];}
     else{
