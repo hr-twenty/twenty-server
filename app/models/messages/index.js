@@ -12,7 +12,7 @@ exports.getAll = function(data, callback) {
     'MATCH path=(c)-[*]->(m:Message)',
     'WITH other, m, c',
     'MATCH (other)-[:WORKS_FOR]->(company:Company)',
-    'RETURN other, collect(m) as messages, c.connectDate as connectDate, collect(company) as company'
+    'RETURN DISTINCT other, collect(m) as messages, c.connectDate as connectDate, collect(company) as company'
   ].join('\n');
 
   var params = {
