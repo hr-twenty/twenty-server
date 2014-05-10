@@ -21,7 +21,7 @@ exports.getStack = function (data, callback) {
 
   var params = {
     userId: data.userId,
-    excludeId: data.stackIds
+    excludeId: data.excludeId
   };
 
   // Make sure correct params exist
