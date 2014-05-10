@@ -12,7 +12,7 @@ exports.getAll = function(data, callback) {
     'MATCH path=(c)-[*]->(m:Message)',
     'WITH other, m, c',
     'MATCH (other)-[:WORKS_FOR]->(company:Company)',
-    'RETURN other, collect(m) as messages, c.connectDate as connectDate, company'
+    'RETURN other, collect(m) as messages, c.connectDate as connectDate, collect(company) as company'
   ].join('\n');
 
   var params = {
@@ -37,7 +37,7 @@ exports.getOne = function(data, callback){
     'LIMIT 1',
     'MATCH path=(c)-[*]->(m:Message)',
     'WHERE m.time > {mostRecentMsg}',
-    'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages, company'
+    'RETURN DISTINCT other, c.connectDate as connectDate, collect(m) as messages, collect(company) as company'
   ].join('\n');
 
   // need to check for missing params due to bug in node-neo4j
@@ -60,7 +60,7 @@ exports.getOne = function(data, callback){
 //Clean up the data from Neo4j before sending to the front end
 var processMessages = function(userId, results, callback){
   var companyHelper = function(company){
-    if(!!company){return company.data;}
+    if(!!company){return [company.data[0]];}
     else{return 'Not Entered';}
   };
   var finalResults = results.map(function(obj){
