@@ -10,7 +10,7 @@ exports.getStack = function (data, callback) {
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     //Removed this line initially to increase users on stack
     // 'WHERE type(r2) <> "REJECTED"',
-    'WHERE NOT other.userId IN {excludeId}',
+    'WHERE NOT other.userId IN ['+ data.excludeId + '] ',
     'WITH other, r2',
     'LIMIT 20',
     'MATCH (other)-[r3]->(otherInfo)',
@@ -22,8 +22,7 @@ exports.getStack = function (data, callback) {
   ].join('\n');
 
   var params = {
-    userId: data.userId,
-    excludeId: data.excludeId
+    userId: data.userId
   };
 
   // Make sure correct params exist
