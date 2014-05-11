@@ -13,7 +13,9 @@ exports.create = function (linkedInData, callback) {
   }
 
   var query = [
-    'MERGE (user:User {userId:{userId}, firstName:{firstName}, lastName:{lastName}, headline: {headline}, picture: {picture}, numConnections: {numConnections}})',
+    'MERGE (user:User {userId:{userId}})',
+    'SET user.firstName={firstName}, user.lastName={lastName}, user.headline={headline}, user.picture={picture}, user.numConnections={numConnections}',
+    'WITH user',
     'MERGE (user)-[:HAS_STACK]->(:Stack)',
     'WITH user',
     'SET user.lastActive = "'+new Date().getTime()+'"',
