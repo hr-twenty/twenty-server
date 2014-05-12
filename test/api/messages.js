@@ -23,4 +23,14 @@ describe('messaging system', function(){
     });
   });
 
+  it('should respond with 400 when missing a userId', function(done) {
+    session
+    .get(host + '/conversations/all', 
+    .expect(400)
+    .end(function(err, res) {
+      
+      done();
+    });
+  });
+
 })
