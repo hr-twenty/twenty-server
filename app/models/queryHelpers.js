@@ -2,7 +2,7 @@
 
 /*--------Query Helper Methods-----------*/
 exports.positionQuery = function(user){
-  if(user.positions){
+  if(user.positions && user.positions.values){
     var finalResult = '';
     var isCurrentPos = function(p){
       if(p.isCurrent === 'true' || p.isCurrent === true){return 'ROLE_IS';} 
@@ -30,11 +30,13 @@ exports.positionQuery = function(user){
       'WITH user ';
     });
     return finalResult;
+  } else {
+    return ' ';
   }
 };
 
 exports.languageQuery = function(user){
-  if(user.languages){
+  if(user.languages && user.languages.values){
     var finalResult = '';
     user.languages.values.forEach(function(l){
       finalResult += 'MERGE (language:Language {name:"'+l.language.name+'"}) '+
@@ -42,11 +44,13 @@ exports.languageQuery = function(user){
       'WITH user ';
     });
     return finalResult;
+  } else {
+    return ' ';
   }
 };
 
 exports.skillQuery = function(user){
-  if(user.skills){
+  if(user.skills && user.skills.values){
     var finalResult = '';
     user.skills.values.forEach(function(s){
       finalResult += 'MERGE (skill:Skill {skill:"'+s.skill.name+'"}) '+
@@ -54,11 +58,13 @@ exports.skillQuery = function(user){
       'WITH user ';
     });
     return finalResult;
+  } else {
+    return ' ';
   }
 };
 
 exports.schoolQuery = function(user){
-  if(user.educations){
+  if(user.educations && user.educations.values){
     var startYearOrNA = function(s){
       if(s.startDate){return s.startDate.year;}
       else {return 'Not Entered';}
@@ -74,5 +80,7 @@ exports.schoolQuery = function(user){
       'WITH user ';
     });
     return finalResult;
+  } else {
+    return ' ';
   }
 };
