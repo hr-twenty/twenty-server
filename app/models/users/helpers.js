@@ -6,7 +6,7 @@ exports.validateUserData = function(data) {
   if(!data.lastName) { missing.push('lastName');}
   if(!data.headline) { missing.push('headline');}
   if(!data.pictureUrl) { missing.push('pictureUrl');}
-  if(!data.numConnections) { missing.push('numConnections');}
+  if(data.numConnections === undefined) { missing.push('numConnections');}
   if(!data.industry) {missing.push('industry');}
 
   if (!data.location) {

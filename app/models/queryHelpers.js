@@ -17,13 +17,16 @@ exports.positionQuery = function(user){
       else {return p.endDate.year;}
     };
     user.positions.values.forEach(function(p){
+      var startYear = p.startDate? p.startDate.year : '0';
+      var startMonth = p.startDate? p.startDate.month : '0';
+
       finalResult += 'MERGE (position:Position {title:"'+p.title+'"}) '+
       'CREATE UNIQUE (user)-[:'+isCurrentPos(p)+']->(position) '+
       'WITH user '+
       'MERGE (company:Company {name:"'+p.company.name+'"}) '+
       'MERGE (companySize:CompanySize {size:"'+(p.company.size || 'Not Entered')+'"}) '+
       'CREATE UNIQUE (company) -[:HAS_CO_SIZE]-> (companySize) '+
-      'CREATE UNIQUE (user) -[:'+isCurrentCo(p)+' {startDate:"'+p.startDate.month+'-'+p.startDate.year+'", endDate:"'+isCurrentDate(p)+'"}]-> (company) '+
+      'CREATE UNIQUE (user) -[:'+isCurrentCo(p)+' {startDate:"'+startMonth+'-'+startYear+'", endDate:"'+isCurrentDate(p)+'"}]-> (company) '+
       'WITH user ';
     });
     return finalResult;
