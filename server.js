@@ -20,11 +20,11 @@ function bootstrap(ip, port, envType) {
   module.exports = app;
 }
 
-if (env.envType === 'development') {
-  require('dns').lookup(require('os').hostname(), function(err, ip) {
-    bootstrap(ip, env.port, env.envType);
-  });
-} else {
+// if (env.envType === 'development') {
+//   require('dns').lookup(require('os').hostname(), function(err, ip) {
+//     bootstrap(ip, env.port, env.envType);
+//   });
+// } else {
   bootstrap(env.ip, env.port, env.envType);
-}
+// }
 
