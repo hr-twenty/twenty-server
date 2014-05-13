@@ -84,6 +84,7 @@ exports.approve = function (data, callback) {
     otherId: data.otherId
   };
 
+  console.log('approving', params);
   // Make sure correct params exist
   if (!(params.userId && params.otherId))
     return callback(new Error('Missing valid params to query'));
