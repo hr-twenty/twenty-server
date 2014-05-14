@@ -20,9 +20,9 @@ exports.getAll = function(data, callback) {
   };
   
   // Make sure correct params exist
-  if (!params.userId)
-    return callback(new Error('Missing valid params to query'));
-
+  if (!params.userId){
+      return callback(new Error('Missing valid params to query'));
+  }
   db.query(query, params, function (err, results) {
     if (err) { return callback(err); }
     else { processMessages(data.userId, results, callback); }
@@ -48,9 +48,9 @@ exports.getOne = function(data, callback){
   };
 
   // Make sure correct params exist
-  if (!params.userId || !params.otherId || !params.mostRecentMsg)
-    return callback(new Error('Missing valid params to query'));
-
+  if (!params.userId || !params.otherId || !params.mostRecentMsg){
+      return callback(new Error('Missing valid params to query'));
+  }
   db.query(query, params, function (err, results) {
     if (err){callback(err);}
     else {processMessages(data.userId, results, callback);}
@@ -106,9 +106,9 @@ exports.sendMessage = function(data, callback){
   };
 
   // Make sure correct params exist
-  if (!params.userId || !params.otherId || !params.text || !params.time)
-    return callback(new Error('Missing valid params to query'));
-
+  if (!params.userId || !params.otherId || !params.text || !params.time){
+      return callback(new Error('Missing valid params to query'));
+  }
   db.query(query, params, function (err, results) {
     callback(err, results);
   });
