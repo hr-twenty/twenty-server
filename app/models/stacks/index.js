@@ -91,7 +91,7 @@ exports.approve = function (data, callback) {
   db.query(query, params, function (err, results) {
     if (err){return callback(err);}
     // if both parties have approved, create a conversation node
-    if(results.length > 0 && results[0].otherToUserRel === 'APPROVED'){
+    if(results[0].otherToUserRel === 'APPROVED'){
       var query2 = [
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
         'WITH user, other',
