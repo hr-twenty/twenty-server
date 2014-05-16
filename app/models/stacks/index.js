@@ -4,8 +4,6 @@ var db = require('../../../config/neo4j'),
 
 /*--------Stack Methods-----------*/
 exports.getStack = function (data, callback) {
-  console.log('!!!!!!!!!!!!!! getstack data', data);
-
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(:Stack)-[:STACK_USER]->(other:User)-[:HAS_STACK]->(os:Stack)-[r2]->(user)',
     //Removed this line initially to increase users on stack
@@ -26,11 +24,11 @@ exports.getStack = function (data, callback) {
   };
 
   // Make sure correct params exist
-  if (!params.userId)
-    return callback(new Error('Missing valid params to query'));
-
+  if (!params.userId){
+      return callback(new Error('Missing valid params to query'));
+  }
   db.query(query, params, function (err, stackResults) {
-    if (err) return callback(err);
+    if (err) {return callback(err);}
     //if there aren't enough users on the stack, get more users from the cluster
     if(stackResults.length < 10){
       matchMaker.matches(data.userId, function(err,clusterResults){
@@ -86,13 +84,14 @@ exports.approve = function (data, callback) {
 
   console.log('approving', params);
   // Make sure correct params exist
-  if (!(params.userId && params.otherId))
+  if (!(params.userId && params.otherId)) {
     return callback(new Error('Missing valid params to query'));
+  }
 
   db.query(query, params, function (err, results) {
-    if (err) return callback(err);
+    if (err){return callback(err);}
     // if both parties have approved, create a conversation node
-    if(results.length > 0 && results[0].otherToUserRel === 'APPROVED'){
+    if(results[0].otherToUserRel === 'APPROVED'){
       var query2 = [
         'MATCH (user:User {userId:{userId}}), (other:User {userId:{otherId}})',
         'WITH user, other',
@@ -135,8 +134,9 @@ exports.reject = function (data, callback) {
   };
   
   // Make sure correct params exist
-  if (!params.userId || !params.otherId)
-    return callback(new Error('Missing valid params to query'));
+  if (!params.userId || !params.otherId){
+      return callback(new Error('Missing valid params to query'));
+  }
 
   db.query(query, params, function (err, results) {
     callback(err, results);
