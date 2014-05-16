@@ -145,6 +145,7 @@ exports.reject = function (data, callback) {
 
 //reset all of the relationships I've created with other users on my stack
 exports.resetStack = function (data, callback) {
+  console.log('reset stack');
   var query = [
     'MATCH (user:User {userId:{userId}})-[:HAS_STACK]->(us:Stack)-[r1]->(other:User)',
     'DELETE r1',

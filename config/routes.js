@@ -13,7 +13,7 @@ module.exports = function(app, passport) {
 
   //UserStack
   // app.use('/userStack', passport.authorize('linkedin', { failureRedirect: '/login' }))
-  app.post('/userStack/:action', stacks.create);
+  app.post('/userStack/:action', stacks.action);
   app.get('/userStack', stacks.show);
 
   //Messages

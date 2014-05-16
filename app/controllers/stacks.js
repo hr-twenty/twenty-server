@@ -9,7 +9,7 @@ exports.show = function(req, res){
 };
 
 // POST /userStack/:action
-exports.create = function(req, res){
+exports.action = function(req, res){
   var stackData = req.body;
   Stack[req.params.action](stackData, helper.respond(res, 400, 201));
 };
