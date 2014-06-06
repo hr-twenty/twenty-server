@@ -1,6 +1,6 @@
 module.exports = {
   envType: 'production',
   databaseUri: 'http://localhost:7474',
-  ip: '191.239.9.198',
+  ip: 'twenty-prod.cloudapp.net',
   port: 55555
 }
