@@ -20,7 +20,8 @@ module.exports = function(app, passport, ip, port) {
   passport.use(new LinkedInStrategy({
     clientID: linkedin.apiKey,
     clientSecret: linkedin.secretKey,
-    callbackURL: 'http://' + ip + ':' + port + linkedin.redirectUri,
+    callbackURL: 'http://twenty-prod.cloudapp.net:55555' + linkedin.redirectUri,
+    // callbackURL: 'http://' + ip + ':' + port + linkedin.redirectUri,
     scope: [ 'r_fullprofile' ],
     profileFields: [
       'id',
